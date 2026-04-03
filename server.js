@@ -1,7 +1,7 @@
+```javascript
 const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
 
 const app = express();
 
@@ -9,38 +9,35 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ===== FILE PATH =====
-const DATA_FILE = path.join(__dirname, 'data.json');
+// ===== MONGODB CONNECTION =====
+// ❗ IMPORTANT: Put your connection string inside quotes
+const MONGO_URI = const MONGO_URI = "mongodb+srv://rohit:rohit123@cluster0.dsu4l.mongodb.net/schoolDB?retryWrites=true&w=majority";
 
-// ===== INIT FILE =====
-if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify({
-        contributions: [],
-        expenses: []
-    }, null, 2));
-}
+mongoose.connect(MONGO_URI)
+    .then(() => console.log("✅ MongoDB Connected"))
+    .catch(err => console.error("❌ MongoDB Error:", err));
 
-// ===== FUNCTIONS =====
-function loadData() {
-    const raw = fs.readFileSync(DATA_FILE);
-    return JSON.parse(raw);
-}
-
-function saveData(data) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-}
-
-// ===== SERVE FRONTEND =====
-app.use(express.static(__dirname));
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dashboard.html'));
+// ===== SCHEMAS =====
+const contributionSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    amount: { type: Number, required: true },
+    date: { type: Date, default: Date.now }
 });
+
+const expenseSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    amount: { type: Number, required: true },
+    paidBy: { type: String, default: "Unknown" },
+    date: { type: Date, default: Date.now }
+});
+
+// ===== MODELS =====
+const Contribution = mongoose.model('Contribution', contributionSchema);
+const Expense = mongoose.model('Expense', expenseSchema);
 
 // ===== LOGIN =====
 const USERS = [
-    { username: "admin", password: "admin123", role: "admin" },
-    { username: "user", password: "user123", role: "viewer" }
+    { username: "admin", password: "admin123", role: "admin" }
 ];
 
 app.post('/api/login', (req, res) => {
@@ -54,24 +51,23 @@ app.post('/api/login', (req, res) => {
         return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    res.json({
-        username: user.username,
-        role: user.role
-    });
+    res.json(user);
 });
 
 // ===== CONTRIBUTIONS =====
-app.get('/api/contributions', (req, res) => {
+
+// GET
+app.get('/api/contributions', async (req, res) => {
     try {
-        const data = loadData();
-        res.json(data.contributions || []);
+        const data = await Contribution.find().sort({ date: -1 });
+        res.json(data);
     } catch (err) {
-        console.error(err);
-        res.json([]);
+        res.status(500).json({ error: err.message });
     }
 });
 
-app.post('/api/contributions', (req, res) => {
+// POST
+app.post('/api/contributions', async (req, res) => {
     try {
         const { name, amount } = req.body;
 
@@ -79,55 +75,33 @@ app.post('/api/contributions', (req, res) => {
             return res.status(400).json({ error: "Invalid data" });
         }
 
-        const data = loadData();
-
-        const newItem = {
-            _id: Date.now().toString(),
+        const newData = new Contribution({
             name,
-            amount: Number(amount),
-            date: new Date()
-        };
+            amount: Number(amount)
+        });
 
-        data.contributions.push(newItem);
-        saveData(data);
-
-        res.json(newItem);
+        await newData.save();
+        res.json(newData);
 
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.delete('/api/contributions/:id', (req, res) => {
-    try {
-        const data = loadData();
-
-        data.contributions = data.contributions.filter(
-            item => item._id !== req.params.id
-        );
-
-        saveData(data);
-        res.json({ message: "Deleted" });
-
-    } catch (err) {
-        console.error(err);
         res.status(500).json({ error: err.message });
     }
 });
 
 // ===== EXPENSES =====
-app.get('/api/expenses', (req, res) => {
+
+// GET
+app.get('/api/expenses', async (req, res) => {
     try {
-        const data = loadData();
-        res.json(data.expenses || []);
+        const data = await Expense.find().sort({ date: -1 });
+        res.json(data);
     } catch (err) {
-        console.error(err);
-        res.json([]);
+        res.status(500).json({ error: err.message });
     }
 });
 
-app.post('/api/expenses', (req, res) => {
+// POST
+app.post('/api/expenses', async (req, res) => {
     try {
         const { name, amount, paidBy } = req.body;
 
@@ -135,51 +109,28 @@ app.post('/api/expenses', (req, res) => {
             return res.status(400).json({ error: "Invalid data" });
         }
 
-        const data = loadData();
-
-        const newItem = {
-            _id: Date.now().toString(),
+        const newData = new Expense({
             name,
             amount: Number(amount),
-            paidBy: paidBy || "Unknown",
-            date: new Date()
-        };
+            paidBy
+        });
 
-        data.expenses.push(newItem);
-        saveData(data);
-
-        res.json(newItem);
+        await newData.save();
+        res.json(newData);
 
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.delete('/api/expenses/:id', (req, res) => {
-    try {
-        const data = loadData();
-
-        data.expenses = data.expenses.filter(
-            item => item._id !== req.params.id
-        );
-
-        saveData(data);
-        res.json({ message: "Deleted" });
-
-    } catch (err) {
-        console.error(err);
         res.status(500).json({ error: err.message });
     }
 });
 
 // ===== SUMMARY =====
-app.get('/api/summary', (req, res) => {
+app.get('/api/summary', async (req, res) => {
     try {
-        const data = loadData();
+        const contributions = await Contribution.find();
+        const expenses = await Expense.find();
 
-        const totalC = data.contributions.reduce((sum, c) => sum + c.amount, 0);
-        const totalE = data.expenses.reduce((sum, e) => sum + e.amount, 0);
+        const totalC = contributions.reduce((s, x) => s + x.amount, 0);
+        const totalE = expenses.reduce((s, x) => s + x.amount, 0);
 
         res.json({
             totalContributions: totalC,
@@ -188,35 +139,17 @@ app.get('/api/summary', (req, res) => {
         });
 
     } catch (err) {
-        console.error(err);
-        res.json({
-            totalContributions: 0,
-            totalExpenses: 0,
-            balance: 0
-        });
-    }
-});
-
-// ===== CLEAR ALL =====
-app.delete('/api/clear-all', (req, res) => {
-    try {
-        const emptyData = {
-            contributions: [],
-            expenses: []
-        };
-
-        saveData(emptyData);
-        res.json({ message: "All data cleared" });
-
-    } catch (err) {
-        console.error(err);
         res.status(500).json({ error: err.message });
     }
 });
+
+// ===== STATIC FILES =====
+app.use(express.static(__dirname));
 
 // ===== SERVER =====
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-    console.log("Server running on port " + PORT);
+    console.log("🚀 Server running on port " + PORT);
 });
+```
