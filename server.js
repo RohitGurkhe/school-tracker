@@ -1,4 +1,3 @@
-
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
@@ -35,12 +34,33 @@ function saveData(data) {
 app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index-mongodb.html'));
+    res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
+
+// ===== LOGIN =====
+const USERS = [
+    { username: "admin", password: "admin123", role: "admin" },
+    { username: "user", password: "user123", role: "viewer" }
+];
+
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+
+    const user = USERS.find(
+        u => u.username === username && u.password === password
+    );
+
+    if (!user) {
+        return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    res.json({
+        username: user.username,
+        role: user.role
+    });
 });
 
 // ===== CONTRIBUTIONS =====
-
-// GET
 app.get('/api/contributions', (req, res) => {
     try {
         const data = loadData();
@@ -51,7 +71,6 @@ app.get('/api/contributions', (req, res) => {
     }
 });
 
-// POST
 app.post('/api/contributions', (req, res) => {
     try {
         const { name, amount } = req.body;
@@ -80,7 +99,6 @@ app.post('/api/contributions', (req, res) => {
     }
 });
 
-// DELETE
 app.delete('/api/contributions/:id', (req, res) => {
     try {
         const data = loadData();
@@ -99,8 +117,6 @@ app.delete('/api/contributions/:id', (req, res) => {
 });
 
 // ===== EXPENSES =====
-
-// GET
 app.get('/api/expenses', (req, res) => {
     try {
         const data = loadData();
@@ -111,7 +127,6 @@ app.get('/api/expenses', (req, res) => {
     }
 });
 
-// POST
 app.post('/api/expenses', (req, res) => {
     try {
         const { name, amount, paidBy } = req.body;
@@ -141,7 +156,6 @@ app.post('/api/expenses', (req, res) => {
     }
 });
 
-// DELETE
 app.delete('/api/expenses/:id', (req, res) => {
     try {
         const data = loadData();
@@ -201,50 +215,8 @@ app.delete('/api/clear-all', (req, res) => {
 });
 
 // ===== SERVER =====
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-    console.log("Server running on http://localhost:" + PORT);
+    console.log("Server running on port " + PORT);
 });
-const USERS = [
-    { username: "admin", password: "admin123", role: "admin" },
-    { username: "user", password: "user123", role: "viewer" }
-];
-
-app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
-
-    const user = USERS.find(u => u.username === username && u.password === password);
-
-    if (!user) {
-        return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    res.json({
-        username: user.username,
-        role: user.role
-    });
-});
-```javascript
-const USERS = [
-    { username: "admin", password: "admin123", role: "admin" },
-    { username: "user", password: "user123", role: "viewer" }
-];
-
-app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
-
-    const user = USERS.find(
-        u => u.username === username && u.password === password
-    );
-
-    if (!user) {
-        return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    res.json({
-        username: user.username,
-        role: user.role
-    });
-});
-```
