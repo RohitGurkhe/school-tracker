@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Public Dashboard</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI';
+    background: linear-gradient(135deg, #8B4513, #D2691E);
+}
+
+/* HEADER */
+.header {
+    text-align: center;
+    color: white;
+    padding: 40px 20px;
+}
+
+/* MAIN */
+.container {
+    max-width: 1000px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    margin-top: -30px;
+}
+
+/* BUTTON */
+.admin-btn {
+    float: right;
+    background: #8B4513;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* CARDS */
+.cards {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.card {
+    flex: 1;
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.value {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+/* LIST */
+.section {
+    margin-top: 30px;
+}
+
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.green { color: green; }
+.red { color: red; }
+
+</style>
+
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <h1>🎓 10th M1 Get-Together</h1>
+    <p>Event Fund Dashboard (Public View)</p>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+
+<button class="admin-btn" onclick="goLogin()">Admin Login</button>
+
+<!-- SUMMARY -->
+<div class="cards">
+    <div class="card">
+        Total Collected
+        <div class="value green" id="c">₹0</div>
+    </div>
+
+    <div class="card">
+        Total Spent
+        <div class="value red" id="e">₹0</div>
+    </div>
+
+    <div class="card">
+        Balance
+        <div class="value" id="b">₹0</div>
+    </div>
+</div>
+
+<!-- CONTRIBUTIONS -->
+<div class="section">
+    <h3>💰 Contributions</h3>
+    <div id="contrib-list"></div>
+</div>
+
+<!-- EXPENSES -->
+<div class="section">
+    <h3>💸 Expenses</h3>
+    <div id="expense-list"></div>
+</div>
+
+</div>
+
+<script>
+
+// Load data
+async function load(){
+    try{
+        const [cRes, eRes] = await Promise.all([
+            fetch('/api/contributions'),
+            fetch('/api/expenses')
+        ]);
+
+        const contributions = await cRes.json();
+        const expenses = await eRes.json();
+
+        // Summary
+        const totalC = contributions.reduce((s,x)=>s+x.amount,0);
+        const totalE = expenses.reduce((s,x)=>s+x.amount,0);
+        const balance = totalC - totalE;
+
+        document.getElementById("c").innerText = "₹" + totalC;
+        document.getElementById("e").innerText = "₹" + totalE;
+        document.getElementById("b").innerText = "₹" + balance;
+
+        // Contribution list
+        document.getElementById("contrib-list").innerHTML =
+            contributions.map(x => `
+                <div class="list-item">
+                    <span>${x.name}</span>
+                    <span class="green">+₹${x.amount}</span>
+                </div>
+            `).join('');
+
+        // Expense list
+        document.getElementById("expense-list").innerHTML =
+            expenses.map(x => `
+                <div class="list-item">
+                    <span>${x.name}</span>
+                    <span class="red">-₹${x.amount}</span>
+                </div>
+            `).join('');
+
+    } catch(err){
+        console.log(err);
+    }
+}
+
+// Admin login redirect
+function goLogin(){
+    window.location.href = "login.html";
+}
+
+// Load + auto refresh
+load();
+setInterval(load, 3000);
+
+</script>
+
+</body>
+</html>
