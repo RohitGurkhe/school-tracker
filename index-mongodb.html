@@ -396,7 +396,7 @@
 
     <script>
         // API Configuration
-        const API_URL = ''; // Change this to your backend URL
+       const API_URL = window.location.origin;// Change this to your backend URL
         let expenseChart = null;
 
         // Load data on startup
@@ -493,19 +493,28 @@
         /**
          * Delete transaction
          */
-       async function deleteTransaction(id,type){
-    if(!confirm("Delete this entry?")) return;
+     async function deleteTransaction(id, type) {
+    if (!confirm("Delete this entry?")) return;
 
-    const url = type==='c'
-        ? `${API_URL}/api/contributions/${id}`
-        : `${API_URL}/api/expenses/${id}`;
+    try {
+        const endpoint = type === 'contribution'
+            ? `/api/contributions/${id}`
+            : `/api/expenses/${id}`;
 
-    const res = await fetch(url,{method:'DELETE'});
+        const res = await fetch(`${API_URL}${endpoint}`, {
+            method: 'DELETE'
+        });
 
-    if(res.ok){
+        if (!res.ok) {
+            throw new Error("Delete failed");
+        }
+
         loadData();
-    } else {
-        alert("❌ Delete failed");
+        alert("✅ Deleted successfully");
+
+    } catch (err) {
+        console.error(err);
+        alert("❌ Error deleting transaction");
     }
 }
 
