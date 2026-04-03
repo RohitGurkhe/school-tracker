@@ -36,7 +36,7 @@ const Expense = mongoose.model('Expense', expenseSchema);
 
 // ===== LOGIN =====
 const USERS = [
-    { username: "admin", password: "admin123", role: "admin" }
+    { username: "admin", password: "Demo@2511", role: "admin" }
 ];
 
 app.post('/api/login', (req, res) => {
