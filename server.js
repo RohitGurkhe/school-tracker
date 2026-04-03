@@ -154,3 +154,25 @@ app.listen(PORT, () => {
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/dashboard.html');
 });
+
+//===== DELETE CONTRIBUTION =====
+
+app.delete('/api/contributions/:id', async (req, res) => {
+    try {
+        await Contribution.findByIdAndDelete(req.params.id);
+        res.json({ message: "Deleted" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+//===== DELETE EXPENSE =====
+
+app.delete('/api/expenses/:id', async (req, res) => {
+    try {
+        await Expense.findByIdAndDelete(req.params.id);
+        res.json({ message: "Deleted" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});

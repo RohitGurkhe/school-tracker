@@ -1,696 +1,160 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>10th M1 Get-Together - Expense Tracker (Real-Time)</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10th M1 Get-Together - Expense Tracker</title>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-        }
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont;
+    background: linear-gradient(135deg,#8B4513,#D2691E);
+    padding:20px;
+}
+.container {
+    max-width:1100px;
+    margin:auto;
+    background:white;
+    border-radius:12px;
+    padding:25px;
+}
+.header { text-align:center; color:#333; }
+.card { background:#f5f5f5; padding:15px; margin:10px 0; border-radius:8px; }
+.btn { padding:10px; cursor:pointer; }
+.delete-btn { background:#e74c3c; color:white; border:none; padding:5px 10px; cursor:pointer; }
 
-        .header-banner {
-            background: linear-gradient(135deg, rgba(139, 69, 19, 0.85) 0%, rgba(210, 105, 30, 0.85) 100%),
-                        url('./school.jpeg') center/cover no-repeat;
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
-            position: relative;
-            min-height: 300px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .header-banner h1 {
-            font-size: 36px;
-            margin-bottom: 10px;
-            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.6);
-            margin-top: 0;
-            font-weight: 600;
-        }
-
-        .header-banner p {
-            font-size: 18px;
-            opacity: 0.98;
-            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
-            margin: 8px 0;
-        }
-
-        .header-banner .school-name {
-            font-size: 14px;
-            opacity: 0.95;
-            margin-top: 8px;
-            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
-        }
-
-        .main-content {
-            padding: 30px;
-        }
-
-        .export-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-bottom: 30px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .btn-csv {
-            background: #3498db;
-            color: white;
-            border-color: #2980b9;
-        }
-
-        .btn-csv:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
-        }
-
-        .btn-excel {
-            background: #27ae60;
-            color: white;
-            border-color: #229954;
-        }
-
-        .btn-excel:hover {
-            background: #229954;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
-        }
-
-        .btn-clear {
-            background: #e74c3c;
-            color: white;
-            border-color: #c0392b;
-        }
-
-        .btn-clear:hover {
-            background: #c0392b;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
-        }
-
-        .summary-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            text-align: center;
-        }
-
-        .card-label {
-            color: #666;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-
-        .card-value {
-            font-size: 28px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .card-value.positive {
-            color: #27ae60;
-        }
-
-        .card-value.negative {
-            color: #e74c3c;
-        }
-
-        .section {
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 25px;
-            margin-bottom: 25px;
-        }
-
-        .section h2 {
-            font-size: 18px;
-            margin-bottom: 20px;
-            color: #333;
-            border-bottom: 2px solid #8B4513;
-            padding-bottom: 10px;
-        }
-
-        .form-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .form-group.full {
-            grid-template-columns: 1fr;
-        }
-
-        .form-group input {
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #8B4513;
-            box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
-        }
-
-        .btn-add {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 15px;
-            transition: all 0.3s;
-        }
-
-        .btn-add-contrib {
-            background: #8B4513;
-            color: white;
-        }
-
-        .btn-add-contrib:hover {
-            background: #704010;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.4);
-        }
-
-        .btn-add-expense {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .btn-add-expense:hover {
-            background: #c0392b;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
-        }
-
-        .transactions-list {
-            max-height: 450px;
-            overflow-y: auto;
-        }
-
-        .transaction-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .transaction-item:last-child {
-            border-bottom: none;
-        }
-
-        .transaction-info h3 {
-            font-size: 14px;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .transaction-info p {
-            font-size: 12px;
-            color: #999;
-        }
-
-        .transaction-amount {
-            font-weight: 600;
-            font-size: 15px;
-        }
-
-        .transaction-amount.positive {
-            color: #27ae60;
-        }
-
-        .transaction-amount.negative {
-            color: #e74c3c;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin-top: 20px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #999;
-        }
-
-        .loading {
-            text-align: center;
-            color: #8B4513;
-            padding: 10px;
-        }
-
-        .delete-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            margin-left: 10px;
-        }
-
-        .delete-btn:hover {
-            background: #c0392b;
-        }
-
-        .info-box {
-            background: #d1ecf1;
-            border-left: 4px solid #17a2b8;
-            padding: 12px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            font-size: 12px;
-            color: #0c5460;
-        }
-    </style>
+input { padding:10px; margin:5px; }
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <div class="header-banner">
-            <h1>🎓 10th M1 Get-Together</h1>
-            <p>Event Fund & Expense Tracker </p>
-            <div class="school-name">Modern School & Jr. College, Vashi, Navi Mumbai</div>
-        </div>
 
-        <div class="main-content">
-           
-                
-            </div>
+<div class="container">
 
-            <div class="export-buttons">
-                <button class="btn btn-csv" onclick="exportToCSV()">📥 Download CSV</button>
-                <button class="btn btn-excel" onclick="exportToExcel()">📊 Download Excel</button>
-                <button class="btn btn-clear" onclick="clearAllData()">🗑️ Clear All</button>
-            </div>
+<h2>🎓 10th M1 Get-Together</h2>
 
-            <div class="summary-cards">
-                <div class="card">
-                    <div class="card-label">💰 Total Collected</div>
-                    <div class="card-value positive" id="total-contrib">₹0</div>
-                </div>
-                <div class="card">
-                    <div class="card-label">💸 Total Spent</div>
-                    <div class="card-value negative" id="total-exp">₹0</div>
-                </div>
-                <div class="card">
-                    <div class="card-label">💵 Balance Left</div>
-                    <div class="card-value" id="net-balance" style="color: #8B4513;">₹0</div>
-                </div>
-            </div>
+<h3>Total Balance: ₹<span id="balance">0</span></h3>
 
-            <div class="section">
-                <h2>➕ Add Collection/Contribution</h2>
-                <div class="form-group">
-                    <input type="text" placeholder="Member Name / Collection From" id="contrib-name">
-                    <input type="number" placeholder="Amount (₹)" id="contrib-amount" step="0.01" min="0">
-                </div>
-                <button class="btn-add btn-add-contrib" onclick="addContribution()">Add Collection</button>
-            </div>
+<hr>
 
-            <div class="section">
-                <h2>➖ Add Expense</h2>
-                <div class="form-group">
-                    <input type="text" placeholder="Expense Description" id="expense-name">
-                    <input type="number" placeholder="Amount Spent (₹)" id="expense-amount" step="0.01" min="0">
-                </div>
-                <div class="form-group full">
-                    <input type="text" placeholder="Who paid? (Optional)" id="expense-paid-by">
-                </div>
-                <button class="btn-add btn-add-expense" onclick="addExpense()">Add Expense</button>
-            </div>
+<h3>Add Contribution</h3>
+<input id="cname" placeholder="Name">
+<input id="camount" type="number" placeholder="Amount">
+<button onclick="addContribution()">Add</button>
 
-            <div class="section">
-                <h2>📋 All Transactions</h2>
-                <div class="loading" id="loading-state" style="display:none;">Loading transactions...</div>
-                <div class="transactions-list" id="transactions-list">
-                    <div class="empty-state">
-                        <p>No transactions yet.</p>
-                    </div>
-                </div>
-            </div>
+<h3>Add Expense</h3>
+<input id="ename" placeholder="Expense">
+<input id="eamount" type="number" placeholder="Amount">
+<button onclick="addExpense()">Add</button>
 
-            <div class="section">
-                <h2>📊 Expense Breakdown</h2>
-                <div class="chart-container">
-                    <canvas id="expenseChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
+<hr>
 
-    <script>
-        // API Configuration
-        const API_URL = ''; // Change this to your backend URL
-        let expenseChart = null;
+<h3>Transactions</h3>
+<div id="list"></div>
 
-        // Load data on startup
-        window.addEventListener('load', () => {
-            loadData();
-            // Auto-refresh every 5 seconds to see updates from other users
-            setInterval(loadData, 5000);
-        });
+</div>
 
-        /**
-         * Load all data from server
-         */
-        async function loadData() {
-            try {
-                const [contributions, expenses] = await Promise.all([
-                    fetch(`${API_URL}/api/contributions`).then(r => r.json()),
-                    fetch(`${API_URL}/api/expenses`).then(r => r.json())
-                ]);
+<script>
 
-                window.contributions = contributions;
-                window.expenses = expenses;
+// ✅ Works both LOCAL + LIVE
+const API_URL = window.location.origin;
 
-                updateUI();
-            } catch (err) {
-                console.log('⚠️ Could not load data:', err);
-                console.log('Make sure backend server is running!');
-            }
-        }
+// LOAD DATA
+async function loadData(){
+    const [c,e] = await Promise.all([
+        fetch(`${API_URL}/api/contributions`).then(r=>r.json()),
+        fetch(`${API_URL}/api/expenses`).then(r=>r.json())
+    ]);
 
-        /**
-         * Update UI with current data
-         */
-        function updateUI() {
-            updateSummary();
-            updateTransactionsList();
-            updateChart();
-        }
+    window.contributions = c;
+    window.expenses = e;
 
-        /**
-         * Update summary cards
-         */
-        function updateSummary() {
-            const contributions = window.contributions || [];
-            const expenses = window.expenses || [];
+    updateUI();
+}
 
-            const totalC = contributions.reduce((sum, c) => sum + c.amount, 0);
-            const totalE = expenses.reduce((sum, e) => sum + e.amount, 0);
-            const balance = totalC - totalE;
+// UPDATE UI
+function updateUI(){
+    let total = 0;
 
-            document.getElementById('total-contrib').textContent = '₹' + Math.round(totalC).toLocaleString('en-IN');
-            document.getElementById('total-exp').textContent = '₹' + Math.round(totalE).toLocaleString('en-IN');
-            
-            const balanceEl = document.getElementById('net-balance');
-            balanceEl.textContent = '₹' + Math.round(balance).toLocaleString('en-IN');
-            balanceEl.style.color = balance >= 0 ? '#27ae60' : '#e74c3c';
-        }
+    const all = [
+        ...window.contributions.map(x=>({...x,type:'c'})),
+        ...window.expenses.map(x=>({...x,type:'e'}))
+    ].sort((a,b)=>new Date(b.date)-new Date(a.date));
 
-        /**
-         * Update transactions list
-         */
-        function updateTransactionsList() {
-            const contributions = window.contributions || [];
-            const expenses = window.expenses || [];
+    let html = '';
 
-            const allTrans = [
-                ...contributions.map(c => ({...c, type: 'contribution'})),
-                ...expenses.map(e => ({...e, type: 'expense'}))
-            ].sort((a, b) => new Date(b.date) - new Date(a.date));
+    all.forEach(item=>{
+        total += item.type==='c'?item.amount:-item.amount;
 
-            if (allTrans.length === 0) {
-                document.getElementById('transactions-list').innerHTML = 
-                    '<div class="empty-state"><p>No transactions yet. Start adding collections and expenses!</p></div>';
-                return;
-            }
+        html += `
+        <div class="card">
+            <b>${item.name}</b> - ₹${item.amount}
+            <button class="delete-btn" onclick="deleteItem('${item._id}','${item.type}')">Delete</button>
+        </div>`;
+    });
 
-            const listHTML = allTrans.map(t => `
-                <div class="transaction-item">
-                    <div class="transaction-info">
-                        <h3>${t.name}</h3>
-                        <p>${new Date(t.date).toLocaleDateString('en-IN')} - ${t.type === 'contribution' ? '🎁 Collection' : ('💸 Expense' + (t.paidBy ? ` (Paid by: ${t.paidBy})` : ''))}</p>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div class="transaction-amount ${t.type === 'contribution' ? 'positive' : 'negative'}">
-                            ${t.type === 'contribution' ? '+' : '-'}₹${Math.round(t.amount).toLocaleString('en-IN')}
-                        </div>
-                        <button class="delete-btn" onclick="deleteTransaction('${t._id}', '${t.type}')">Delete</button>
-                    </div>
-                </div>
-            `).join('');
+    document.getElementById("list").innerHTML = html;
+    document.getElementById("balance").innerText = total;
+}
 
-            document.getElementById('transactions-list').innerHTML = listHTML;
-        }
+// ADD CONTRIBUTION
+async function addContribution(){
+    const name = document.getElementById("cname").value;
+    const amount = Number(document.getElementById("camount").value);
 
-        /**
-         * Delete transaction
-         */
-        async function deleteTransaction(id, type) {
-            try {
-                const endpoint = type === 'contribution' ? `/api/contributions/${id}` : `/api/expenses/${id}`;
-                await fetch(`${API_URL}${endpoint}`, { method: 'DELETE' });
-                loadData();
-            } catch (err) {
-                alert('❌ Error deleting transaction');
-            }
-        }
+    if(!name || amount<=0) return alert("Enter valid data");
 
-        /**
-         * Update chart
-         */
-        function updateChart() {
-            const expenses = window.expenses || [];
+    await fetch(`${API_URL}/api/contributions`,{
+        method:"POST",
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({name,amount})
+    });
 
-            const typeMap = {};
-            expenses.forEach(e => {
-                const type = e.name ? e.name.split(/[\s,]/)[0] : 'Other';
-                typeMap[type] = (typeMap[type] || 0) + e.amount;
-            });
+    document.getElementById("cname").value='';
+    document.getElementById("camount").value='';
 
-            const labels = Object.keys(typeMap);
-            const data = Object.values(typeMap);
+    loadData();
+}
 
-            if (labels.length === 0) {
-                document.getElementById('expenseChart').parentElement.innerHTML = 
-                    '<div class="empty-state"><p>No expenses to display</p></div>';
-                return;
-            }
+// ADD EXPENSE
+async function addExpense(){
+    const name = document.getElementById("ename").value;
+    const amount = Number(document.getElementById("eamount").value);
 
-            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'];
+    if(!name || amount<=0) return alert("Enter valid data");
 
-            if (expenseChart) {
-                expenseChart.destroy();
-            }
+    await fetch(`${API_URL}/api/expenses`,{
+        method:"POST",
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({name,amount})
+    });
 
-            expenseChart = new Chart(document.getElementById('expenseChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: colors.slice(0, labels.length),
-                        borderColor: '#ffffff',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { padding: 15, font: { size: 12 } }
-                        }
-                    }
-                }
-            });
-        }
+    document.getElementById("ename").value='';
+    document.getElementById("eamount").value='';
 
-        /**
-         * Add contribution
-         */
-        async function addContribution() {
-            const name = document.getElementById('contrib-name').value.trim();
-            const amount = parseFloat(document.getElementById('contrib-amount').value);
+    loadData();
+}
 
-            if (!name || !amount || amount <= 0) {
-                alert('❌ Please enter valid name and amount');
-                return;
-            }
+// ✅ DELETE FIXED
+async function deleteItem(id,type){
+    if(!confirm("Delete this entry?")) return;
 
-            try {
-                await fetch(`${API_URL}/api/contributions`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, amount })
-                });
+    const url = type==='c'
+        ? `${API_URL}/api/contributions/${id}`
+        : `${API_URL}/api/expenses/${id}`;
 
-                document.getElementById('contrib-name').value = '';
-                document.getElementById('contrib-amount').value = '';
-                loadData();
-                alert('✅ Collection added!');
-            } catch (err) {
-                alert('❌ Error adding collection');
-            }
-        }
+    await fetch(url,{method:'DELETE'});
 
-        /**
-         * Add expense
-         */
-        async function addExpense() {
-            const name = document.getElementById('expense-name').value.trim();
-            const amount = parseFloat(document.getElementById('expense-amount').value);
-            const paidBy = document.getElementById('expense-paid-by').value.trim();
+    loadData();
+}
 
-            if (!name || !amount || amount <= 0) {
-                alert('❌ Please enter valid description and amount');
-                return;
-            }
+// START
+loadData();
 
-            try {
-                await fetch(`${API_URL}/api/expenses`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, amount, paidBy })
-                });
+</script>
 
-                document.getElementById('expense-name').value = '';
-                document.getElementById('expense-amount').value = '';
-                document.getElementById('expense-paid-by').value = '';
-                loadData();
-                alert('✅ Expense added!');
-            } catch (err) {
-                alert('❌ Error adding expense');
-            }
-        }
-
-        /**
-         * Export to CSV
-         */
-        async function exportToCSV() {
-            const contributions = window.contributions || [];
-            const expenses = window.expenses || [];
-
-            let csv = 'Date,Time,Type,Description,Amount (₹),Paid By\n';
-
-            contributions.forEach(c => {
-                const date = new Date(c.date);
-                csv += `"${date.toLocaleDateString('en-IN')}","${date.toLocaleTimeString('en-IN')}","Collection","${c.name}",${c.amount},""\n`;
-            });
-
-            expenses.forEach(e => {
-                const date = new Date(e.date);
-                csv += `"${date.toLocaleDateString('en-IN')}","${date.toLocaleTimeString('en-IN')}","Expense","${e.name}",${e.amount},"${e.paidBy}"\n`;
-            });
-
-            const totalC = contributions.reduce((sum, c) => sum + c.amount, 0);
-            const totalE = expenses.reduce((sum, e) => sum + e.amount, 0);
-            csv += `\n"Summary"\n"Total Collections",${totalC}\n"Total Expenses",${totalE}\n"Balance",${totalC - totalE}\n`;
-
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `10th_M1_Tracker_${new Date().toLocaleDateString('en-CA')}.csv`;
-            link.click();
-
-            alert('✅ CSV downloaded!');
-        }
-
-        /**
-         * Export to Excel
-         */
-        async function exportToExcel() {
-            const contributions = window.contributions || [];
-            const expenses = window.expenses || [];
-
-            const transData = [['Date', 'Time', 'Type', 'Description', 'Amount', 'Paid By']];
-            
-            contributions.forEach(c => {
-                const date = new Date(c.date);
-                transData.push([date.toLocaleDateString('en-IN'), date.toLocaleTimeString('en-IN'), 'Collection', c.name, c.amount, '']);
-            });
-
-            expenses.forEach(e => {
-                const date = new Date(e.date);
-                transData.push([date.toLocaleDateString('en-IN'), date.toLocaleTimeString('en-IN'), 'Expense', e.name, e.amount, e.paidBy]);
-            });
-
-            const totalC = contributions.reduce((sum, c) => sum + c.amount, 0);
-            const totalE = expenses.reduce((sum, e) => sum + e.amount, 0);
-
-            const summaryData = [['Summary'], [], ['Total Collections', totalC], ['Total Expenses', totalE], ['Balance', totalC - totalE]];
-
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(transData), 'Transactions');
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryData), 'Summary');
-
-            XLSX.writeFile(wb, `10th_M1_Tracker_${new Date().toLocaleDateString('en-CA')}.xlsx`);
-
-            alert('✅ Excel downloaded!');
-        }
-
-        /**
-         * Clear all data
-         */
-        async function clearAllData() {
-            if (confirm('⚠️ Delete ALL data?')) {
-                try {
-                    await fetch(`${API_URL}/api/clear-all`, { method: 'DELETE' });
-                    loadData();
-                    alert('✅ All data cleared!');
-                } catch (err) {
-                    alert('❌ Error clearing data');
-                }
-            }
-        }
-    </script>
 </body>
 </html>
