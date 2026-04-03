@@ -1,4 +1,3 @@
-```javascript
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -11,7 +10,7 @@ app.use(express.json());
 
 // ===== MONGODB CONNECTION =====
 // ❗ IMPORTANT: Put your connection string inside quotes
-const MONGO_URI = const MONGO_URI = "mongodb+srv://rohit:rohit123@cluster0.dsu4l.mongodb.net/schoolDB?retryWrites=true&w=majority";
+ const MONGO_URI = "mongodb+srv://rohit:rohit123@cluster0.dsu4l.mongodb.net/schoolDB?retryWrites=true&w=majority";
 
 mongoose.connect(MONGO_URI)
     .then(() => console.log("✅ MongoDB Connected"))
@@ -152,4 +151,3 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log("🚀 Server running on port " + PORT);
 });
-```
