@@ -76,6 +76,17 @@ body {
 .green { color: green; }
 .red { color: red; }
 
+/* FOOTER */
+.footer {
+    position: fixed;
+    bottom: 15px;
+    right: 20px;
+    font-size: 13px;
+    color: #fff;
+    background: rgba(0,0,0,0.2);
+    padding: 6px 10px;
+    border-radius: 6px;
+}
 </style>
 
 </head>
@@ -124,6 +135,11 @@ body {
 
 </div>
 
+<!-- FOOTER -->
+<div class="footer">
+    Created by Rohit Gurkhe
+</div>
+
 <script>
 
 // Load data
@@ -146,7 +162,7 @@ async function load(){
         document.getElementById("e").innerText = "₹" + totalE;
         document.getElementById("b").innerText = "₹" + balance;
 
-        // Contribution list
+        // Contributions
         document.getElementById("contrib-list").innerHTML =
             contributions.map(x => `
                 <div class="list-item">
@@ -155,7 +171,7 @@ async function load(){
                 </div>
             `).join('');
 
-        // Expense list
+        // Expenses
         document.getElementById("expense-list").innerHTML =
             expenses.map(x => `
                 <div class="list-item">
@@ -169,7 +185,7 @@ async function load(){
     }
 }
 
-// Admin login redirect
+// Admin redirect
 function goLogin(){
     window.location.href = "login.html";
 }
