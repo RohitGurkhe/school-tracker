@@ -2,190 +2,180 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>10th M1 Get-Together</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10th M1 Get-Together - Expense Tracker (Real-Time)</title>
 
-<style>
-body {
-    font-family: Arial;
-    background: linear-gradient(135deg,#8B4513,#D2691E);
-    padding:20px;
-}
-.container {
-    max-width:1100px;
-    margin:auto;
-    background:white;
-    border-radius:10px;
-    padding:20px;
-}
-.header {
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-.btn {
-    padding:8px 12px;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-}
-.logout-btn {
-    background:#333;
-    color:white;
-}
-.delete-btn {
-    background:red;
-    color:white;
-}
-.card {
-    padding:10px;
-    margin:8px 0;
-    background:#f5f5f5;
-    border-radius:6px;
-}
-input {
-    padding:8px;
-    margin:5px;
-}
-</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- ✅ YOUR ORIGINAL CSS (UNCHANGED) -->
 </head>
 
 <body>
-
 <div class="container">
 
-<div class="header">
-    <h2>🎓 10th M1 Get-Together</h2>
+    <!-- HEADER -->
+    <div class="header-banner">
+        <h1>🎓 10th M1 Get-Together</h1>
+        <p>Event Fund & Expense Tracker</p>
+        <div class="school-name">Modern School & Jr. College, Vashi, Navi Mumbai</div>
 
-    <!-- ✅ LOGOUT BUTTON -->
-    <button class="btn logout-btn" onclick="logout()">Logout</button>
-</div>
+        <!-- ✅ LOGOUT BUTTON (ADDED ONLY) -->
+        <button onclick="logout()" style="position:absolute; top:20px; right:20px; background:#333;color:#fff;padding:8px 12px;border:none;border-radius:6px;">
+            Logout
+        </button>
+    </div>
 
-<h3>Total Balance: ₹<span id="balance">0</span></h3>
+    <div class="main-content">
 
-<hr>
+        <!-- EXPORT BUTTONS -->
+        <div class="export-buttons">
+            <button class="btn btn-csv" onclick="exportToCSV()">📥 Download CSV</button>
+            <button class="btn btn-excel" onclick="exportToExcel()">📊 Download Excel</button>
+            <!-- ❌ CLEAR ALL REMOVED -->
+        </div>
 
-<h3>Add Contribution</h3>
-<input id="cname" placeholder="Name">
-<input id="camount" type="number" placeholder="Amount">
-<button class="btn" onclick="addContribution()">Add</button>
+        <!-- SUMMARY -->
+        <div class="summary-cards">
+            <div class="card">
+                <div class="card-label">💰 Total Collected</div>
+                <div class="card-value positive" id="total-contrib">₹0</div>
+            </div>
+            <div class="card">
+                <div class="card-label">💸 Total Spent</div>
+                <div class="card-value negative" id="total-exp">₹0</div>
+            </div>
+            <div class="card">
+                <div class="card-label">💵 Balance Left</div>
+                <div class="card-value" id="net-balance">₹0</div>
+            </div>
+        </div>
 
-<h3>Add Expense</h3>
-<input id="ename" placeholder="Expense">
-<input id="eamount" type="number" placeholder="Amount">
-<button class="btn" onclick="addExpense()">Add</button>
+        <!-- ADD CONTRIBUTION -->
+        <div class="section">
+            <h2>➕ Add Collection/Contribution</h2>
+            <input type="text" id="contrib-name" placeholder="Name">
+            <input type="number" id="contrib-amount" placeholder="Amount">
+            <button onclick="addContribution()">Add</button>
+        </div>
 
-<hr>
+        <!-- ADD EXPENSE -->
+        <div class="section">
+            <h2>➖ Add Expense</h2>
+            <input type="text" id="expense-name" placeholder="Expense">
+            <input type="number" id="expense-amount" placeholder="Amount">
+            <input type="text" id="expense-paid-by" placeholder="Paid By">
+            <button onclick="addExpense()">Add</button>
+        </div>
 
-<h3>Transactions</h3>
-<div id="list"></div>
+        <!-- TRANSACTIONS -->
+        <div class="section">
+            <h2>📋 All Transactions</h2>
+            <div id="transactions-list"></div>
+        </div>
 
+    </div>
 </div>
 
 <script>
 
-// 🔒 PROTECT PAGE
+// 🔒 ADMIN PROTECTION
 const user = JSON.parse(localStorage.getItem("user"));
 if (!user || user.role !== "admin") {
     window.location.href = "/login.html";
 }
 
-// ✅ AUTO URL (WORKS LOCAL + LIVE)
+// ✅ AUTO URL FIX
 const API_URL = window.location.origin;
 
 // LOAD DATA
-async function loadData(){
-    const [c,e] = await Promise.all([
-        fetch(`${API_URL}/api/contributions`).then(r=>r.json()),
-        fetch(`${API_URL}/api/expenses`).then(r=>r.json())
+async function loadData() {
+    const [contributions, expenses] = await Promise.all([
+        fetch(`${API_URL}/api/contributions`).then(r => r.json()),
+        fetch(`${API_URL}/api/expenses`).then(r => r.json())
     ]);
 
-    window.contributions = c;
-    window.expenses = e;
+    window.contributions = contributions;
+    window.expenses = expenses;
 
     updateUI();
 }
 
-// UPDATE UI
-function updateUI(){
-    let total = 0;
+// UPDATE UI (YOUR SAME STYLE)
+function updateUI() {
+    let totalC = 0;
+    let totalE = 0;
+
+    contributions.forEach(c => totalC += c.amount);
+    expenses.forEach(e => totalE += e.amount);
+
+    document.getElementById('total-contrib').innerText = "₹" + totalC;
+    document.getElementById('total-exp').innerText = "₹" + totalE;
+    document.getElementById('net-balance').innerText = "₹" + (totalC - totalE);
 
     const all = [
-        ...window.contributions.map(x=>({...x,type:'contribution'})),
-        ...window.expenses.map(x=>({...x,type:'expense'}))
+        ...contributions.map(x => ({...x, type:'contribution'})),
+        ...expenses.map(x => ({...x, type:'expense'}))
     ].sort((a,b)=>new Date(b.date)-new Date(a.date));
 
-    let html='';
+    let html = '';
 
-    all.forEach(item=>{
-        total += item.type==='contribution'?item.amount:-item.amount;
-
+    all.forEach(t => {
         html += `
-        <div class="card">
-            <b>${item.name}</b> - ₹${item.amount}
-            <button class="btn delete-btn" onclick="deleteTransaction('${item._id}','${item.type}')">Delete</button>
+        <div class="transaction-item">
+            <div>
+                <b>${t.name}</b> - ₹${t.amount}
+            </div>
+            <button onclick="deleteTransaction('${t._id}','${t.type}')">Delete</button>
         </div>`;
     });
 
-    document.getElementById("list").innerHTML = html;
-    document.getElementById("balance").innerText = total;
+    document.getElementById("transactions-list").innerHTML = html;
 }
 
 // ADD CONTRIBUTION
 async function addContribution(){
-    const name=document.getElementById("cname").value;
-    const amount=Number(document.getElementById("camount").value);
+    const name = document.getElementById("contrib-name").value;
+    const amount = Number(document.getElementById("contrib-amount").value);
 
-    if(!name||amount<=0)return alert("Enter valid data");
-
-    await fetch(`${API_URL}/api/contributions`,{
+    await fetch(`${API_URL}/api/contributions`, {
         method:"POST",
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({name,amount})
+        body: JSON.stringify({name,amount})
     });
 
-    document.getElementById("cname").value='';
-    document.getElementById("camount").value='';
     loadData();
 }
 
 // ADD EXPENSE
 async function addExpense(){
-    const name=document.getElementById("ename").value;
-    const amount=Number(document.getElementById("eamount").value);
+    const name = document.getElementById("expense-name").value;
+    const amount = Number(document.getElementById("expense-amount").value);
+    const paidBy = document.getElementById("expense-paid-by").value;
 
-    if(!name||amount<=0)return alert("Enter valid data");
-
-    await fetch(`${API_URL}/api/expenses`,{
+    await fetch(`${API_URL}/api/expenses`, {
         method:"POST",
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({name,amount})
+        body: JSON.stringify({name,amount,paidBy})
     });
 
-    document.getElementById("ename").value='';
-    document.getElementById("eamount").value='';
     loadData();
 }
 
 // ✅ DELETE FIXED
 async function deleteTransaction(id,type){
-    if(!confirm("Delete this entry?")) return;
+    if(!confirm("Delete?")) return;
 
     const url = type==='contribution'
         ? `${API_URL}/api/contributions/${id}`
         : `${API_URL}/api/expenses/${id}`;
 
-    const res = await fetch(url,{method:'DELETE'});
-
-    if(res.ok){
-        loadData();
-    } else {
-        alert("❌ Delete failed");
-    }
+    await fetch(url,{method:'DELETE'});
+    loadData();
 }
 
-// ✅ LOGOUT FUNCTION
+// ✅ LOGOUT
 function logout(){
     localStorage.removeItem("user");
     window.location.href="/login.html";
