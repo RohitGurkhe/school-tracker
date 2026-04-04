@@ -4,20 +4,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>10th M1 Get-Together - Expense Tracker (Real-Time)</title>
+<title>10th M1 Get-Together - Expense Tracker</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
-/* ✅ YOUR ORIGINAL UI (UNCHANGED) */
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:-apple-system;background:linear-gradient(135deg,#8B4513,#D2691E);padding:20px;}
-.container{max-width:1100px;margin:auto;background:white;border-radius:12px;overflow:hidden;}
-.header-banner{background:linear-gradient(135deg,#8B4513,#D2691E);color:white;padding:40px;text-align:center;}
-.main-content{padding:30px;}
-.card{background:#f5f5f5;padding:15px;border-radius:8px;margin-bottom:10px;}
-.delete-btn{background:#e74c3c;color:white;border:none;padding:5px 10px;border-radius:4px;cursor:pointer;}
+body {
+    font-family: -apple-system, BlinkMacSystemFont;
+    background: linear-gradient(135deg,#8B4513,#D2691E);
+    padding:20px;
+}
+.container {
+    max-width:1100px;
+    margin:auto;
+    background:white;
+    border-radius:12px;
+    padding:25px;
+}
+.header { text-align:center; color:#333; }
+.card { background:#f5f5f5; padding:15px; margin:10px 0; border-radius:8px; }
+.btn { padding:10px; cursor:pointer; }
+.delete-btn { background:#e74c3c; color:white; border:none; padding:5px 10px; cursor:pointer; }
+
+input { padding:10px; margin:5px; }
 </style>
 </head>
 
@@ -25,12 +34,7 @@ body{font-family:-apple-system;background:linear-gradient(135deg,#8B4513,#D2691E
 
 <div class="container">
 
-<div class="header-banner">
-<h1>🎓 10th M1 Get-Together</h1>
-<p>Expense Tracker</p>
-</div>
-
-<div class="main-content">
+<h2>🎓 10th M1 Get-Together</h2>
 
 <h3>Total Balance: ₹<span id="balance">0</span></h3>
 
@@ -52,11 +56,10 @@ body{font-family:-apple-system;background:linear-gradient(135deg,#8B4513,#D2691E
 <div id="list"></div>
 
 </div>
-</div>
 
 <script>
 
-// ✅ IMPORTANT FIX
+// ✅ Works both LOCAL + LIVE
 const API_URL = window.location.origin;
 
 // LOAD DATA
@@ -81,7 +84,7 @@ function updateUI(){
         ...window.expenses.map(x=>({...x,type:'e'}))
     ].sort((a,b)=>new Date(b.date)-new Date(a.date));
 
-    let html='';
+    let html = '';
 
     all.forEach(item=>{
         total += item.type==='c'?item.amount:-item.amount;
@@ -89,7 +92,7 @@ function updateUI(){
         html += `
         <div class="card">
             <b>${item.name}</b> - ₹${item.amount}
-            <button class="delete-btn" onclick="deleteTransaction('${item._id}','${item.type}')">Delete</button>
+            <button class="delete-btn" onclick="deleteItem('${item._id}','${item.type}')">Delete</button>
         </div>`;
     });
 
@@ -99,10 +102,10 @@ function updateUI(){
 
 // ADD CONTRIBUTION
 async function addContribution(){
-    const name=document.getElementById("cname").value;
-    const amount=Number(document.getElementById("camount").value);
+    const name = document.getElementById("cname").value;
+    const amount = Number(document.getElementById("camount").value);
 
-    if(!name||amount<=0)return alert("Enter valid data");
+    if(!name || amount<=0) return alert("Enter valid data");
 
     await fetch(`${API_URL}/api/contributions`,{
         method:"POST",
@@ -112,15 +115,16 @@ async function addContribution(){
 
     document.getElementById("cname").value='';
     document.getElementById("camount").value='';
+
     loadData();
 }
 
 // ADD EXPENSE
 async function addExpense(){
-    const name=document.getElementById("ename").value;
-    const amount=Number(document.getElementById("eamount").value);
+    const name = document.getElementById("ename").value;
+    const amount = Number(document.getElementById("eamount").value);
 
-    if(!name||amount<=0)return alert("Enter valid data");
+    if(!name || amount<=0) return alert("Enter valid data");
 
     await fetch(`${API_URL}/api/expenses`,{
         method:"POST",
@@ -130,24 +134,21 @@ async function addExpense(){
 
     document.getElementById("ename").value='';
     document.getElementById("eamount").value='';
+
     loadData();
 }
 
 // ✅ DELETE FIXED
-async function deleteTransaction(id,type){
+async function deleteItem(id,type){
     if(!confirm("Delete this entry?")) return;
 
     const url = type==='c'
         ? `${API_URL}/api/contributions/${id}`
         : `${API_URL}/api/expenses/${id}`;
 
-    const res = await fetch(url,{method:'DELETE'});
+    await fetch(url,{method:'DELETE'});
 
-    if(res.ok){
-        loadData();
-    } else {
-        alert("❌ Delete failed");
-    }
+    loadData();
 }
 
 // START
