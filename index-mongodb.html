@@ -1,160 +1,147 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>10th M1 Get-Together - Expense Tracker</title>
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+const app = express();
 
-<style>
-body {
-    font-family: -apple-system, BlinkMacSystemFont;
-    background: linear-gradient(135deg,#8B4513,#D2691E);
-    padding:20px;
-}
-.container {
-    max-width:1100px;
-    margin:auto;
-    background:white;
-    border-radius:12px;
-    padding:25px;
-}
-.header { text-align:center; color:#333; }
-.card { background:#f5f5f5; padding:15px; margin:10px 0; border-radius:8px; }
-.btn { padding:10px; cursor:pointer; }
-.delete-btn { background:#e74c3c; color:white; border:none; padding:5px 10px; cursor:pointer; }
+// ===== MIDDLEWARE =====
+app.use(cors());
+app.use(express.json());
 
-input { padding:10px; margin:5px; }
-</style>
-</head>
+// ===== MONGODB CONNECTION =====
+const MONGO_URI = "mongodb+srv://rohit:rohit123@cluster0.dsu4l.mongodb.net/schoolDB?retryWrites=true&w=majority";
 
-<body>
+mongoose.connect(MONGO_URI)
+    .then(() => console.log("✅ MongoDB Connected"))
+    .catch(err => console.error("❌ MongoDB Error:", err));
 
-<div class="container">
+// ===== SCHEMAS =====
+const contributionSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    amount: { type: Number, required: true },
+    date: { type: Date, default: Date.now }
+});
 
-<h2>🎓 10th M1 Get-Together</h2>
+const expenseSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    amount: { type: Number, required: true },
+    paidBy: { type: String, default: "Unknown" },
+    date: { type: Date, default: Date.now }
+});
 
-<h3>Total Balance: ₹<span id="balance">0</span></h3>
+// ===== MODELS =====
+const Contribution = mongoose.model('Contribution', contributionSchema);
+const Expense = mongoose.model('Expense', expenseSchema);
 
-<hr>
+// ===== LOGIN =====
+const USERS = [
+    { username: "admin", password: "admin123", role: "admin" }
+];
 
-<h3>Add Contribution</h3>
-<input id="cname" placeholder="Name">
-<input id="camount" type="number" placeholder="Amount">
-<button onclick="addContribution()">Add</button>
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
 
-<h3>Add Expense</h3>
-<input id="ename" placeholder="Expense">
-<input id="eamount" type="number" placeholder="Amount">
-<button onclick="addExpense()">Add</button>
+    const user = USERS.find(
+        u => u.username === username && u.password === password
+    );
 
-<hr>
+    if (!user) {
+        return res.status(401).json({ error: "Invalid credentials" });
+    }
 
-<h3>Transactions</h3>
-<div id="list"></div>
+    res.json(user);
+});
 
-</div>
+// ===== CONTRIBUTIONS =====
+app.get('/api/contributions', async (req, res) => {
+    try {
+        const data = await Contribution.find().sort({ date: -1 });
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
-<script>
+app.post('/api/contributions', async (req, res) => {
+    try {
+        const { name, amount } = req.body;
 
-// ✅ Works both LOCAL + LIVE
-const API_URL = window.location.origin;
+        if (!name || !amount || amount <= 0) {
+            return res.status(400).json({ error: "Invalid data" });
+        }
 
-// LOAD DATA
-async function loadData(){
-    const [c,e] = await Promise.all([
-        fetch(`${API_URL}/api/contributions`).then(r=>r.json()),
-        fetch(`${API_URL}/api/expenses`).then(r=>r.json())
-    ]);
+        const newData = new Contribution({
+            name,
+            amount: Number(amount)
+        });
 
-    window.contributions = c;
-    window.expenses = e;
+        await newData.save();
+        res.json(newData);
 
-    updateUI();
-}
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
-// UPDATE UI
-function updateUI(){
-    let total = 0;
+// ===== EXPENSES =====
+app.get('/api/expenses', async (req, res) => {
+    try {
+        const data = await Expense.find().sort({ date: -1 });
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
-    const all = [
-        ...window.contributions.map(x=>({...x,type:'c'})),
-        ...window.expenses.map(x=>({...x,type:'e'}))
-    ].sort((a,b)=>new Date(b.date)-new Date(a.date));
+app.post('/api/expenses', async (req, res) => {
+    try {
+        const { name, amount, paidBy } = req.body;
 
-    let html = '';
+        if (!name || !amount || amount <= 0) {
+            return res.status(400).json({ error: "Invalid data" });
+        }
 
-    all.forEach(item=>{
-        total += item.type==='c'?item.amount:-item.amount;
+        const newData = new Expense({
+            name,
+            amount: Number(amount),
+            paidBy
+        });
 
-        html += `
-        <div class="card">
-            <b>${item.name}</b> - ₹${item.amount}
-            <button class="delete-btn" onclick="deleteItem('${item._id}','${item.type}')">Delete</button>
-        </div>`;
-    });
+        await newData.save();
+        res.json(newData);
 
-    document.getElementById("list").innerHTML = html;
-    document.getElementById("balance").innerText = total;
-}
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
-// ADD CONTRIBUTION
-async function addContribution(){
-    const name = document.getElementById("cname").value;
-    const amount = Number(document.getElementById("camount").value);
+// ===== SUMMARY =====
+app.get('/api/summary', async (req, res) => {
+    try {
+        const contributions = await Contribution.find();
+        const expenses = await Expense.find();
 
-    if(!name || amount<=0) return alert("Enter valid data");
+        const totalC = contributions.reduce((s, x) => s + x.amount, 0);
+        const totalE = expenses.reduce((s, x) => s + x.amount, 0);
 
-    await fetch(`${API_URL}/api/contributions`,{
-        method:"POST",
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({name,amount})
-    });
+        res.json({
+            totalContributions: totalC,
+            totalExpenses: totalE,
+            balance: totalC - totalE
+        });
 
-    document.getElementById("cname").value='';
-    document.getElementById("camount").value='';
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
-    loadData();
-}
+// ===== STATIC FILES =====
+app.use(express.static(__dirname));
 
-// ADD EXPENSE
-async function addExpense(){
-    const name = document.getElementById("ename").value;
-    const amount = Number(document.getElementById("eamount").value);
+// ===== SERVER =====
+const PORT = process.env.PORT || 5000;
 
-    if(!name || amount<=0) return alert("Enter valid data");
-
-    await fetch(`${API_URL}/api/expenses`,{
-        method:"POST",
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({name,amount})
-    });
-
-    document.getElementById("ename").value='';
-    document.getElementById("eamount").value='';
-
-    loadData();
-}
-
-// ✅ DELETE FIXED
-async function deleteItem(id,type){
-    if(!confirm("Delete this entry?")) return;
-
-    const url = type==='c'
-        ? `${API_URL}/api/contributions/${id}`
-        : `${API_URL}/api/expenses/${id}`;
-
-    await fetch(url,{method:'DELETE'});
-
-    loadData();
-}
-
-// START
-loadData();
-
-</script>
-
-</body>
-</html>
+app.listen(PORT, () => {
+    console.log("🚀 Server running on port " + PORT);
+});
