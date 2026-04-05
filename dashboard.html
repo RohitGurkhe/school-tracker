@@ -3,196 +3,190 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Public Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10th M1 Get-Together</title>
 
 <style>
-body {
+* {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI';
-    background: linear-gradient(135deg, #8B4513, #D2691E);
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ✅ BACKGROUND IMAGE */
+body {
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+
+    background:
+        linear-gradient(135deg, rgba(139,69,19,0.85), rgba(210,105,30,0.85)),
+        url('/school.jpeg') center/cover no-repeat;
+}
+
+/* CONTAINER */
+.container {
+    max-width: 900px;
+    margin: auto;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative; /* required for button */
 }
 
 /* HEADER */
 .header {
     text-align: center;
     color: white;
-    padding: 40px 20px;
+    margin-bottom: 20px;
 }
 
-/* MAIN */
-.container {
-    max-width: 1000px;
-    margin: auto;
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    margin-top: -30px;
-}
-
-/* BUTTON */
+/* ADMIN BUTTON */
 .admin-btn {
-    float: right;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.admin-btn button {
     background: #8B4513;
     color: white;
+    padding: 6px 12px;
     border: none;
-    padding: 8px 14px;
     border-radius: 6px;
     cursor: pointer;
 }
 
-/* CARDS */
-.cards {
+/* SUMMARY */
+.summary {
     display: flex;
-    gap: 15px;
-    margin-top: 20px;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 .card {
     flex: 1;
-    background: #f5f5f5;
-    padding: 20px;
-    border-radius: 10px;
+    background: #f2f2f2;
+    padding: 15px;
+    border-radius: 8px;
     text-align: center;
-}
-
-.value {
-    font-size: 24px;
-    font-weight: bold;
-    margin-top: 8px;
-}
-
-/* LIST */
-.section {
-    margin-top: 30px;
-}
-
-.list-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    border-bottom: 1px solid #eee;
 }
 
 .green { color: green; }
 .red { color: red; }
 
-/* FOOTER */
-.footer {
-    position: fixed;
-    bottom: 15px;
-    right: 20px;
-    font-size: 13px;
-    color: #fff;
-    background: rgba(0,0,0,0.2);
-    padding: 6px 10px;
-    border-radius: 6px;
+/* LIST */
+.section {
+    margin-top: 20px;
 }
-</style>
 
+.item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+</style>
 </head>
+
 <body>
 
-<!-- HEADER -->
 <div class="header">
     <h1>🎓 10th M1 Get-Together</h1>
     <p>Event Fund Dashboard (Public View)</p>
 </div>
 
-<!-- MAIN -->
 <div class="container">
 
-<button class="admin-btn" onclick="goLogin()">Admin Login</button>
-
-<!-- SUMMARY -->
-<div class="cards">
-    <div class="card">
-        Total Collected
-        <div class="value green" id="c">₹0</div>
+    <!-- ✅ ADMIN BUTTON -->
+    <div class="admin-btn">
+        <a href="/login.html">
+            <button>Admin Login</button>
+        </a>
     </div>
 
-    <div class="card">
-        Total Spent
-        <div class="value red" id="e">₹0</div>
+    <!-- SUMMARY -->
+    <div class="summary">
+        <div class="card">
+            <p>Total Collected</p>
+            <h2 id="totalC">₹0</h2>
+        </div>
+
+        <div class="card">
+            <p>Total Spent</p>
+            <h2 id="totalE" class="red">₹0</h2>
+        </div>
+
+        <div class="card">
+            <p>Balance</p>
+            <h2 id="balance">₹0</h2>
+        </div>
     </div>
 
-    <div class="card">
-        Balance
-        <div class="value" id="b">₹0</div>
+    <!-- CONTRIBUTIONS -->
+    <div class="section">
+        <h3>💰 Contributions</h3>
+        <div id="contribList"></div>
     </div>
-</div>
 
-<!-- CONTRIBUTIONS -->
-<div class="section">
-    <h3>💰 Contributions</h3>
-    <div id="contrib-list"></div>
-</div>
+    <!-- EXPENSES -->
+    <div class="section">
+        <h3>💸 Expenses</h3>
+        <div id="expenseList"></div>
+    </div>
 
-<!-- EXPENSES -->
-<div class="section">
-    <h3>💸 Expenses</h3>
-    <div id="expense-list"></div>
-</div>
-
-</div>
-
-<!-- FOOTER -->
-<div class="footer">
-    Created by Rohit Gurkhe
 </div>
 
 <script>
 
-// Load data
-async function load(){
-    try{
-        const [cRes, eRes] = await Promise.all([
-            fetch('/api/contributions'),
-            fetch('/api/expenses')
-        ]);
+const API_URL = window.location.origin;
 
-        const contributions = await cRes.json();
-        const expenses = await eRes.json();
+// LOAD DATA
+async function loadData() {
+    const [c, e] = await Promise.all([
+        fetch(`${API_URL}/api/contributions`).then(r => r.json()),
+        fetch(`${API_URL}/api/expenses`).then(r => r.json())
+    ]);
 
-        // Summary
-        const totalC = contributions.reduce((s,x)=>s+x.amount,0);
-        const totalE = expenses.reduce((s,x)=>s+x.amount,0);
-        const balance = totalC - totalE;
-
-        document.getElementById("c").innerText = "₹" + totalC;
-        document.getElementById("e").innerText = "₹" + totalE;
-        document.getElementById("b").innerText = "₹" + balance;
-
-        // Contributions
-        document.getElementById("contrib-list").innerHTML =
-            contributions.map(x => `
-                <div class="list-item">
-                    <span>${x.name}</span>
-                    <span class="green">+₹${x.amount}</span>
-                </div>
-            `).join('');
-
-        // Expenses
-        document.getElementById("expense-list").innerHTML =
-            expenses.map(x => `
-                <div class="list-item">
-                    <span>${x.name}</span>
-                    <span class="red">-₹${x.amount}</span>
-                </div>
-            `).join('');
-
-    } catch(err){
-        console.log(err);
-    }
+    updateUI(c, e);
 }
 
-// Admin redirect
-function goLogin(){
-    window.location.href = "login.html";
+// UPDATE UI
+function updateUI(contributions, expenses) {
+
+    let totalC = 0;
+    let totalE = 0;
+
+    contributions.forEach(x => totalC += x.amount);
+    expenses.forEach(x => totalE += x.amount);
+
+    document.getElementById("totalC").innerText = "₹" + totalC;
+    document.getElementById("totalE").innerText = "₹" + totalE;
+    document.getElementById("balance").innerText = "₹" + (totalC - totalE);
+
+    document.getElementById("contribList").innerHTML =
+        contributions.map(x => `
+            <div class="item">
+                <span>${x.name}</span>
+                <span class="green">+₹${x.amount}</span>
+            </div>
+        `).join("");
+
+    document.getElementById("expenseList").innerHTML =
+        expenses.map(x => `
+            <div class="item">
+                <span>${x.name}</span>
+                <span class="red">-₹${x.amount}</span>
+            </div>
+        `).join("");
 }
 
-// Load + auto refresh
-load();
-setInterval(load, 3000);
+// AUTO REFRESH
+setInterval(loadData, 5000);
+loadData();
 
 </script>
 
