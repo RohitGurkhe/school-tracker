@@ -13,7 +13,11 @@
     box-sizing: border-box;
 }
 
+<<<<<<< HEAD
 /* ✅ FULL BACKGROUND IMAGE */
+=======
+/* ✅ BACKGROUND IMAGE */
+>>>>>>> 66bea86 (final dashboard with admin button)
 body {
     font-family: Arial, sans-serif;
     min-height: 100vh;
@@ -24,7 +28,11 @@ body {
         url('/school.jpeg') center/cover no-repeat;
 }
 
+<<<<<<< HEAD
 /* MAIN CARD */
+=======
+/* CONTAINER */
+>>>>>>> 66bea86 (final dashboard with admin button)
 .container {
     max-width: 900px;
     margin: auto;
@@ -32,6 +40,10 @@ body {
     backdrop-filter: blur(8px);
     border-radius: 12px;
     padding: 20px;
+<<<<<<< HEAD
+=======
+    position: relative; /* required for button */
+>>>>>>> 66bea86 (final dashboard with admin button)
 }
 
 /* HEADER */
@@ -41,8 +53,25 @@ body {
     margin-bottom: 20px;
 }
 
+<<<<<<< HEAD
 .header h1 {
     color: white;
+=======
+/* ADMIN BUTTON */
+.admin-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.admin-btn button {
+    background: #8B4513;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+>>>>>>> 66bea86 (final dashboard with admin button)
 }
 
 /* SUMMARY */
@@ -88,6 +117,7 @@ body {
 
 <div class="container">
 
+<<<<<<< HEAD
     <!-- SUMMARY -->
     <div class="summary">
         <div class="card">
@@ -118,6 +148,45 @@ body {
         <div id="expenseList"></div>
     </div>
 
+=======
+    <!-- ✅ ADMIN BUTTON -->
+    <div class="admin-btn">
+        <a href="/login.html">
+            <button>Admin Login</button>
+        </a>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="summary">
+        <div class="card">
+            <p>Total Collected</p>
+            <h2 id="totalC">₹0</h2>
+        </div>
+
+        <div class="card">
+            <p>Total Spent</p>
+            <h2 id="totalE" class="red">₹0</h2>
+        </div>
+
+        <div class="card">
+            <p>Balance</p>
+            <h2 id="balance">₹0</h2>
+        </div>
+    </div>
+
+    <!-- CONTRIBUTIONS -->
+    <div class="section">
+        <h3>💰 Contributions</h3>
+        <div id="contribList"></div>
+    </div>
+
+    <!-- EXPENSES -->
+    <div class="section">
+        <h3>💸 Expenses</h3>
+        <div id="expenseList"></div>
+    </div>
+
+>>>>>>> 66bea86 (final dashboard with admin button)
 </div>
 
 <script>
@@ -147,7 +216,10 @@ function updateUI(contributions, expenses) {
     document.getElementById("totalE").innerText = "₹" + totalE;
     document.getElementById("balance").innerText = "₹" + (totalC - totalE);
 
+<<<<<<< HEAD
     // LIST
+=======
+>>>>>>> 66bea86 (final dashboard with admin button)
     document.getElementById("contribList").innerHTML =
         contributions.map(x => `
             <div class="item">
