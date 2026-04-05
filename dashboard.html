@@ -30,10 +30,13 @@ body {
     color: white;
     margin-bottom: 20px;
     position: relative;
+    padding-top: 20px;
 }
 
 .header h1 {
-    font-size: 36px;
+    font-size: 32px;
+    line-height: 1.2;
+    padding: 0 60px; /* prevent overlap */
 }
 
 .header p {
@@ -44,13 +47,13 @@ body {
 .admin-btn {
     position: absolute;
     top: 10px;
-    right: 20px;
+    right: 15px;
     background: #8B4513;
     color: white;
-    padding: 6px 14px;
+    padding: 6px 12px;
     border-radius: 6px;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .admin-btn:hover {
@@ -99,6 +102,15 @@ body {
     border-bottom: 1px solid #ddd;
 }
 
+/* FOOTER */
+.footer {
+    text-align: center;
+    color: white;
+    margin-top: 20px;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
 /* 📱 MOBILE FIX */
 @media (max-width: 600px) {
 
@@ -107,18 +119,19 @@ body {
     }
 
     .header h1 {
-        font-size: 24px;
+        font-size: 22px;
+        padding: 0 50px;
     }
 
     .header p {
-        font-size: 14px;
+        font-size: 13px;
     }
 
     .admin-btn {
         top: 5px;
         right: 10px;
-        font-size: 12px;
-        padding: 5px 10px;
+        font-size: 11px;
+        padding: 5px 8px;
     }
 
     .summary {
@@ -135,6 +148,10 @@ body {
 
     .item {
         font-size: 14px;
+    }
+
+    .footer {
+        font-size: 12px;
     }
 }
 </style>
@@ -181,6 +198,11 @@ body {
         <div id="expenseList"></div>
     </div>
 
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+    Created by Rohit Gurkhe
 </div>
 
 <script>
