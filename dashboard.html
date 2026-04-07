@@ -1,8 +1,3 @@
-
-Rohit Gurkhe <rohitgurkhe5@gmail.com>
-19:17 (51 minutes ago)
-to me
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +5,6 @@ to me
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>10th M1 Get-Together</title>
 
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -18,79 +12,83 @@ to me
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family: Arial, sans-serif;
+font-family: Arial;
 }
 
-/* 🔥 BACKGROUND */
+/* BACKGROUND */
 body{
-min-height:100vh;
 background:
-linear-gradient(rgba(20,30,80,0.8), rgba(20,30,80,0.9)),
+linear-gradient(rgba(180,83,9,0.85), rgba(234,88,12,0.9)),
 url('school.jpeg') center/cover no-repeat;
-color:#fff;
 }
 
 /* HEADER */
 .header{
 display:flex;
 justify-content:space-between;
-align-items:center;
 padding:15px 20px;
-}
-
-.login-btn{
-padding:8px 15px;
-border-radius:8px;
-border:1px solid #fff;
-background:transparent;
 color:#fff;
-cursor:pointer;
 }
 
 /* HERO */
 .hero{
 text-align:center;
-margin:20px;
+color:#fff;
 }
 
-.hero h1{
-font-size:26px;
+/* CONTAINER */
+.container{
+max-width:1000px;
+margin:auto;
+padding:10px;
 }
 
 /* CARD */
 .card{
-background:#ffffff;
-color:#000;
+background:#fff;
 border-radius:12px;
-padding:15px;
-margin:15px;
+padding:20px;
+margin-bottom:15px;
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
+transition:0.3s;
 }
 
-/* SUMMARY */
-.summary{
+.card:hover{
+transform:translateY(-5px);
+box-shadow:0 15px 25px rgba(0,0,0,0.3);
+}
+
+/* SPECIAL COLORS */
+.card-green{
+border-left:5px solid #16a34a;
+}
+
+.card-red{
+border-left:5px solid #dc2626;
+}
+
+/* BALANCE */
+.balance{
+text-align:center;
+font-size:26px;
+margin:10px 0;
+}
+
+/* SMALL BOX */
+.row{
 display:flex;
+justify-content:center;
 gap:10px;
 }
 
 .box{
-flex:1;
-background:#f2f2f2;
-padding:15px;
-border-radius:10px;
-text-align:center;
+background:#f3f4f6;
+padding:8px 15px;
+border-radius:8px;
 }
 
-/* COLORS */
-.green{color:green;}
-.red{color:red;}
-
-/* LIST */
-.item{
-display:flex;
-justify-content:space-between;
-padding:8px 0;
-border-bottom:1px solid #ddd;
-}
+.green{color:#16a34a;}
+.red{color:#dc2626;}
 
 /* CHART */
 canvas{
@@ -99,17 +97,44 @@ margin:auto;
 display:block;
 }
 
-/* LOGIN MODAL */
+/* DROPDOWN */
+.dropdown{
+max-height:0;
+overflow:hidden;
+transition:all 0.4s ease;
+opacity:0;
+}
+
+.dropdown.open{
+max-height:500px;
+opacity:1;
+}
+
+/* LIST ITEM */
+.item{
+display:flex;
+justify-content:space-between;
+padding:10px 0;
+border-bottom:1px solid #eee;
+}
+
+/* LOGIN */
+.login-btn{
+border:1px solid #fff;
+padding:6px 12px;
+border-radius:6px;
+background:transparent;
+color:#fff;
+}
+
 .modal{
 position:fixed;
-top:0;
-left:0;
 width:100%;
 height:100%;
-background:rgba(0,0,0,0.6);
 display:none;
 align-items:center;
 justify-content:center;
+background:rgba(0,0,0,0.6);
 }
 
 .modal-content{
@@ -117,22 +142,6 @@ background:#fff;
 padding:20px;
 border-radius:10px;
 width:300px;
-color:#000;
-}
-
-.modal input{
-width:100%;
-padding:10px;
-margin:8px 0;
-}
-
-.modal button{
-width:100%;
-padding:10px;
-background:#2563eb;
-color:#fff;
-border:none;
-border-radius:8px;
 }
 
 .modal.show{
@@ -143,137 +152,152 @@ display:flex;
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
-<h3>🎓 10th M1</h3>
+
 <button class="login-btn" onclick="openLogin()">Admin Login</button>
 </div>
 
-<!-- HERO -->
 <div class="hero">
-<h1>10th M1 Get-Together</h1>
+<h2>10th M1 Get-Together</h2>
 <p>Event Fund Dashboard</p>
 </div>
 
-<!-- MAIN CARD -->
+<div class="container">
+
+<!-- BALANCE -->
 <div class="card">
+<h3>Current Balance</h3>
+<div class="balance" id="balance">₹0</div>
 
-<h3 style="text-align:center">Balance</h3>
-<h1 id="balance" style="text-align:center">₹0</h1>
-
-<div class="summary">
-<div class="box">
-<p>Collected</p>
-<h3 id="totalC">₹0</h3>
-</div>
-<div class="box">
-<p>Spent</p>
-<h3 id="totalE" class="red">₹0</h3>
+<div class="row">
+<div class="box green">Collected: ₹<span id="totalC">0</span></div>
+<div class="box red">Spent: ₹<span id="totalE">0</span></div>
 </div>
 </div>
 
 <!-- CHART -->
+<div class="card">
+<h3>Fund Breakdown</h3>
 <canvas id="chart"></canvas>
+</div>
 
-<!-- CONTRIBUTIONS -->
-<h3>💰 Contributions</h3>
-<div id="contribList"></div>
+<!-- 💰 CONTRIBUTIONS CARD -->
+<div class="card card-green">
+<h3 onclick="toggle('contrib')" style="cursor:pointer;">
+💰 Contributions ▼
+</h3>
+<div id="contribList" class="dropdown"></div>
+</div>
 
-<!-- EXPENSES -->
-<h3>💸 Expenses</h3>
-<div id="expenseList"></div>
+<!-- 💸 EXPENSES CARD -->
+<div class="card card-red">
+<h3 onclick="toggle('expense')" style="cursor:pointer;">
+💸 Expenses ▼
+</h3>
+<div id="expenseList" class="dropdown"></div>
+</div>
 
 </div>
 
-<!-- LOGIN MODAL -->
+<!-- LOGIN -->
 <div class="modal" id="loginModal">
 <div class="modal-content">
-<h3>Admin Login</h3>
+<h3>Login</h3>
 <input id="user" placeholder="Username">
 <input id="pass" type="password" placeholder="Password">
 <button onclick="login()">Login</button>
-<p id="err" style="color:red;"></p>
 </div>
 </div>
 
 <script>
 
-const API_URL = "https://school-tracker-vnba.onrender.com";
+const API="https://school-tracker-vnba.onrender.com";
 let chart;
 
-// LOAD DATA
 async function loadData(){
-const [c,e] = await Promise.all([
-fetch(`${API_URL}/api/contributions`).then(r=>r.json()),
-fetch(`${API_URL}/api/expenses`).then(r=>r.json())
+
+const [c,e]=await Promise.all([
+fetch(`${API}/api/contributions`).then(r=>r.json()),
+fetch(`${API}/api/expenses`).then(r=>r.json())
 ]);
 
-updateUI(c,e);
+update(c,e);
 }
 
-// UPDATE UI
-function updateUI(c,e){
+function update(c,e){
 
-let totalC = c.reduce((s,x)=>s+x.amount,0);
-let totalE = e.reduce((s,x)=>s+x.amount,0);
+let tc=c.reduce((s,x)=>s+x.amount,0);
+let te=e.reduce((s,x)=>s+x.amount,0);
 
-document.getElementById("totalC").innerText="₹"+totalC;
-document.getElementById("totalE").innerText="₹"+totalE;
-document.getElementById("balance").innerText="₹"+(totalC-totalE);
+document.getElementById("totalC").innerText=tc;
+document.getElementById("totalE").innerText=te;
+document.getElementById("balance").innerText="₹"+(tc-te);
 
-document.getElementById("contribList").innerHTML =
-c.map(x=>`<div class="item"><span>${x.name}</span><span class="green">+₹${x.amount}</span></div>`).join("");
+document.getElementById("contribList").innerHTML=
+c.map(x=>`
+<div class="item">
+${x.name}
+<span class="green">+₹${x.amount}</span>
+</div>
+`).join("");
 
-document.getElementById("expenseList").innerHTML =
-e.map(x=>`<div class="item"><span>${x.name}</span><span class="red">-₹${x.amount}</span></div>`).join("");
+document.getElementById("expenseList").innerHTML=
+e.map(x=>`
+<div class="item">
+${x.name}
+<span class="red">-₹${x.amount}</span>
+</div>
+`).join("");
 
-drawChart(totalC,totalE);
+drawChart(tc,te);
 }
 
-// CHART
+/* CHART */
 function drawChart(c,e){
 
-const ctx = document.getElementById("chart");
+const ctx=document.getElementById("chart");
 
 if(chart) chart.destroy();
 
-chart = new Chart(ctx,{
+chart=new Chart(ctx,{
 type:'doughnut',
 data:{
 labels:["Collected","Spent"],
 datasets:[{
 data:[c,e],
-backgroundColor:["green","red"]
+backgroundColor:["#16a34a","#dc2626"]
 }]
 }
 });
 }
 
-// LOGIN
+/* DROPDOWN */
+function toggle(type){
+const el=document.getElementById(type==="contrib"?"contribList":"expenseList");
+el.classList.toggle("open");
+}
+
+/* LOGIN */
 function openLogin(){
 document.getElementById("loginModal").classList.add("show");
 }
 
 async function login(){
-
-const user = document.getElementById("user").value;
-const pass = document.getElementById("pass").value;
-
-const res = await fetch(`${API_URL}/api/login`,{
+const res=await fetch(`${API}/api/login`,{
 method:"POST",
 headers:{'Content-Type':'application/json'},
-body:JSON.stringify({username:user,password:pass})
+body:JSON.stringify({
+username:document.getElementById("user").value,
+password:document.getElementById("pass").value
+})
 });
 
 if(res.ok){
 localStorage.setItem("isAdmin","true");
 window.location.href="/index-mongodb.html";
-}else{
-document.getElementById("err").innerText="Invalid login";
 }
 }
 
-// AUTO REFRESH
 loadData();
 setInterval(loadData,5000);
 
