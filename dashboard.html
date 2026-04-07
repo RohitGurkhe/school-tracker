@@ -5,147 +5,123 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>10th M1 Get-Together</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family: Arial;
 }
 
-/* BACKGROUND */
 body{
+font-family:Arial;
 background:
-linear-gradient(rgba(180,83,9,0.85), rgba(234,88,12,0.9)),
-url('school.jpeg') center/cover no-repeat;
+linear-gradient(135deg, rgba(139,69,19,0.9), rgba(210,105,30,0.9)),
+url('/school.jpeg') center/cover no-repeat;
+min-height:100vh;
+padding:20px;
 }
 
 /* HEADER */
 .header{
-display:flex;
-justify-content:space-between;
-padding:15px 20px;
-color:#fff;
+text-align:center;
+color:white;
+margin-bottom:20px;
+position:relative;
 }
 
-/* HERO */
-.hero{
-text-align:center;
+.admin-btn{
+position:absolute;
+right:10px;
+top:10px;
+background:#8B4513;
 color:#fff;
+padding:6px 12px;
+border-radius:6px;
+text-decoration:none;
+}
+
+.admin-btn:hover{
+background:#6d3410;
 }
 
 /* CONTAINER */
 .container{
-max-width:1000px;
+max-width:900px;
 margin:auto;
-padding:10px;
 }
 
-/* CARD */
+/* SUMMARY CARDS */
+.summary{
+display:flex;
+gap:10px;
+margin-bottom:20px;
+}
+
 .card{
+flex:1;
+background:#fff;
+padding:20px;
+border-radius:12px;
+text-align:center;
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+.card h2{
+margin-top:10px;
+}
+
+.green{color:green;}
+.red{color:red;}
+
+/* DROPDOWN CARDS */
+.drop-card{
 background:#fff;
 border-radius:12px;
-padding:20px;
 margin-bottom:15px;
 box-shadow:0 5px 15px rgba(0,0,0,0.2);
-transition:0.3s;
+overflow:hidden;
 }
 
-.card:hover{
-transform:translateY(-5px);
-box-shadow:0 15px 25px rgba(0,0,0,0.3);
-}
-
-/* SPECIAL COLORS */
-.card-green{
-border-left:5px solid #16a34a;
-}
-
-.card-red{
-border-left:5px solid #dc2626;
-}
-
-/* BALANCE */
-.balance{
-text-align:center;
-font-size:26px;
-margin:10px 0;
-}
-
-/* SMALL BOX */
-.row{
+.drop-header{
+padding:15px;
+cursor:pointer;
 display:flex;
-justify-content:center;
-gap:10px;
+justify-content:space-between;
+font-weight:bold;
+background:#f5f5f5;
 }
 
-.box{
-background:#f3f4f6;
-padding:8px 15px;
-border-radius:8px;
-}
-
-.green{color:#16a34a;}
-.red{color:#dc2626;}
-
-/* CHART */
-canvas{
-max-width:200px;
-margin:auto;
-display:block;
-}
-
-/* DROPDOWN */
-.dropdown{
+.drop-content{
 max-height:0;
 overflow:hidden;
-transition:all 0.4s ease;
-opacity:0;
+transition:0.4s ease;
 }
 
-.dropdown.open{
-max-height:500px;
-opacity:1;
+.drop-content.active{
+max-height:400px;
+padding:10px 15px;
 }
 
-/* LIST ITEM */
 .item{
 display:flex;
 justify-content:space-between;
-padding:10px 0;
-border-bottom:1px solid #eee;
+padding:8px 0;
+border-bottom:1px solid #ddd;
 }
 
-/* LOGIN */
-.login-btn{
-border:1px solid #fff;
-padding:6px 12px;
-border-radius:6px;
-background:transparent;
-color:#fff;
+/* FOOTER */
+.footer{
+text-align:center;
+color:white;
+margin-top:20px;
+font-size:14px;
 }
 
-.modal{
-position:fixed;
-width:100%;
-height:100%;
-display:none;
-align-items:center;
-justify-content:center;
-background:rgba(0,0,0,0.6);
+/* MOBILE */
+@media(max-width:600px){
+.summary{
+flex-direction:column;
 }
-
-.modal-content{
-background:#fff;
-padding:20px;
-border-radius:10px;
-width:300px;
-}
-
-.modal.show{
-display:flex;
 }
 </style>
 </head>
@@ -153,154 +129,110 @@ display:flex;
 <body>
 
 <div class="header">
+<h1>🎓 10th M1 Get-Together</h1>
+<p>Event Fund Dashboard (Public View)</p>
 
-<button class="login-btn" onclick="openLogin()">Admin Login</button>
-</div>
-
-<div class="hero">
-<h2>10th M1 Get-Together</h2>
-<p>Event Fund Dashboard</p>
+<!-- ADMIN LOGIN (UNCHANGED) -->
+<a href="/login.html" class="admin-btn">Admin Login</a>
 </div>
 
 <div class="container">
 
-<!-- BALANCE -->
+<!-- SUMMARY -->
+<div class="summary">
 <div class="card">
-<h3>Current Balance</h3>
-<div class="balance" id="balance">₹0</div>
-
-<div class="row">
-<div class="box green">Collected: ₹<span id="totalC">0</span></div>
-<div class="box red">Spent: ₹<span id="totalE">0</span></div>
-</div>
+<p>Total Collected</p>
+<h2 id="totalC">₹0</h2>
 </div>
 
-<!-- CHART -->
 <div class="card">
-<h3>Fund Breakdown</h3>
-<canvas id="chart"></canvas>
+<p>Total Spent</p>
+<h2 id="totalE" class="red">₹0</h2>
 </div>
 
-<!-- 💰 CONTRIBUTIONS CARD -->
-<div class="card card-green">
-<h3 onclick="toggle('contrib')" style="cursor:pointer;">
+<div class="card">
+<p>Balance</p>
+<h2 id="balance">₹0</h2>
+</div>
+</div>
+
+<!-- CONTRIBUTIONS -->
+<div class="drop-card">
+<div class="drop-header" onclick="toggleDrop('contribList')">
 💰 Contributions ▼
-</h3>
-<div id="contribList" class="dropdown"></div>
+</div>
+<div id="contribList" class="drop-content"></div>
 </div>
 
-<!-- 💸 EXPENSES CARD -->
-<div class="card card-red">
-<h3 onclick="toggle('expense')" style="cursor:pointer;">
+<!-- EXPENSES -->
+<div class="drop-card">
+<div class="drop-header" onclick="toggleDrop('expenseList')">
 💸 Expenses ▼
-</h3>
-<div id="expenseList" class="dropdown"></div>
+</div>
+<div id="expenseList" class="drop-content"></div>
 </div>
 
 </div>
 
-<!-- LOGIN -->
-<div class="modal" id="loginModal">
-<div class="modal-content">
-<h3>Login</h3>
-<input id="user" placeholder="Username">
-<input id="pass" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
-</div>
+<div class="footer">
+Created by Rohit Gurkhe
 </div>
 
 <script>
+const API_URL = window.location.origin;
 
-const API="https://school-tracker-vnba.onrender.com";
-let chart;
-
-async function loadData(){
-
-const [c,e]=await Promise.all([
-fetch(`${API}/api/contributions`).then(r=>r.json()),
-fetch(`${API}/api/expenses`).then(r=>r.json())
-]);
-
-update(c,e);
+// TOGGLE DROPDOWN
+function toggleDrop(id){
+document.getElementById(id).classList.toggle("active");
 }
 
-function update(c,e){
+// LOAD DATA
+async function loadData(){
+try{
+const [c,e] = await Promise.all([
+fetch(`${API_URL}/api/contributions`).then(r=>r.json()),
+fetch(`${API_URL}/api/expenses`).then(r=>r.json())
+]);
 
-let tc=c.reduce((s,x)=>s+x.amount,0);
-let te=e.reduce((s,x)=>s+x.amount,0);
+updateUI(c,e);
+}catch(err){
+console.error("Error loading data:",err);
+}
+}
 
-document.getElementById("totalC").innerText=tc;
-document.getElementById("totalE").innerText=te;
-document.getElementById("balance").innerText="₹"+(tc-te);
+// UPDATE UI
+function updateUI(contributions, expenses){
 
-document.getElementById("contribList").innerHTML=
-c.map(x=>`
+let totalC=0;
+let totalE=0;
+
+contributions.forEach(x=> totalC += x.amount);
+expenses.forEach(x=> totalE += x.amount);
+
+document.getElementById("totalC").innerText="₹"+totalC;
+document.getElementById("totalE").innerText="₹"+totalE;
+document.getElementById("balance").innerText="₹"+(totalC-totalE);
+
+document.getElementById("contribList").innerHTML =
+contributions.map(x => `
 <div class="item">
-${x.name}
+<span>${x.name}</span>
 <span class="green">+₹${x.amount}</span>
 </div>
 `).join("");
 
-document.getElementById("expenseList").innerHTML=
-e.map(x=>`
+document.getElementById("expenseList").innerHTML =
+expenses.map(x => `
 <div class="item">
-${x.name}
+<span>${x.name}</span>
 <span class="red">-₹${x.amount}</span>
 </div>
 `).join("");
-
-drawChart(tc,te);
 }
 
-/* CHART */
-function drawChart(c,e){
-
-const ctx=document.getElementById("chart");
-
-if(chart) chart.destroy();
-
-chart=new Chart(ctx,{
-type:'doughnut',
-data:{
-labels:["Collected","Spent"],
-datasets:[{
-data:[c,e],
-backgroundColor:["#16a34a","#dc2626"]
-}]
-}
-});
-}
-
-/* DROPDOWN */
-function toggle(type){
-const el=document.getElementById(type==="contrib"?"contribList":"expenseList");
-el.classList.toggle("open");
-}
-
-/* LOGIN */
-function openLogin(){
-document.getElementById("loginModal").classList.add("show");
-}
-
-async function login(){
-const res=await fetch(`${API}/api/login`,{
-method:"POST",
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-username:document.getElementById("user").value,
-password:document.getElementById("pass").value
-})
-});
-
-if(res.ok){
-localStorage.setItem("isAdmin","true");
-window.location.href="/index-mongodb.html";
-}
-}
-
-loadData();
+// AUTO REFRESH
 setInterval(loadData,5000);
-
+loadData();
 </script>
 
 </body>
