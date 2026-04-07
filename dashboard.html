@@ -1,4 +1,8 @@
 
+Rohit Gurkhe <rohitgurkhe5@gmail.com>
+19:17 (51 minutes ago)
+to me
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,251 +10,273 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>10th M1 Get-Together</title>
 
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family: Arial, sans-serif;
 }
 
-/* BACKGROUND */
-body {
-    font-family: Arial, sans-serif;
-    min-height: 100vh;
-    padding: 20px;
-
-    background:
-        linear-gradient(135deg, rgba(139,69,19,0.85), rgba(210,105,30,0.85)),
-        url('/school.jpeg') center/cover no-repeat;
+/* 🔥 BACKGROUND */
+body{
+min-height:100vh;
+background:
+linear-gradient(rgba(20,30,80,0.8), rgba(20,30,80,0.9)),
+url('school.jpeg') center/cover no-repeat;
+color:#fff;
 }
 
 /* HEADER */
-.header {
-    text-align: center;
-    color: white;
-    margin-bottom: 20px;
-    position: relative;
-    padding-top: 20px;
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px 20px;
 }
 
-.header h1 {
-    font-size: 32px;
-    line-height: 1.2;
-    padding: 0 60px; /* prevent overlap */
+.login-btn{
+padding:8px 15px;
+border-radius:8px;
+border:1px solid #fff;
+background:transparent;
+color:#fff;
+cursor:pointer;
 }
 
-.header p {
-    font-size: 16px;
+/* HERO */
+.hero{
+text-align:center;
+margin:20px;
 }
 
-/* ADMIN BUTTON */
-.admin-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    background: #8B4513;
-    color: white;
-    padding: 6px 12px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-size: 13px;
+.hero h1{
+font-size:26px;
 }
 
-.admin-btn:hover {
-    background: #6d3410;
-}
-
-/* CONTAINER */
-.container {
-    max-width: 900px;
-    margin: auto;
-    background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(8px);
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+/* CARD */
+.card{
+background:#ffffff;
+color:#000;
+border-radius:12px;
+padding:15px;
+margin:15px;
 }
 
 /* SUMMARY */
-.summary {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 20px;
+.summary{
+display:flex;
+gap:10px;
 }
 
-.card {
-    flex: 1;
-    background: #f2f2f2;
-    padding: 15px;
-    border-radius: 8px;
-    text-align: center;
+.box{
+flex:1;
+background:#f2f2f2;
+padding:15px;
+border-radius:10px;
+text-align:center;
 }
 
-.green { color: green; }
-.red { color: red; }
+/* COLORS */
+.green{color:green;}
+.red{color:red;}
 
-/* SECTIONS */
-.section {
-    margin-top: 20px;
+/* LIST */
+.item{
+display:flex;
+justify-content:space-between;
+padding:8px 0;
+border-bottom:1px solid #ddd;
 }
 
-.item {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #ddd;
+/* CHART */
+canvas{
+max-width:200px;
+margin:auto;
+display:block;
 }
 
-/* FOOTER */
-.footer {
-    text-align: center;
-    color: white;
-    margin-top: 20px;
-    font-size: 14px;
-    opacity: 0.9;
+/* LOGIN MODAL */
+.modal{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.6);
+display:none;
+align-items:center;
+justify-content:center;
 }
 
-/* 📱 MOBILE FIX */
-@media (max-width: 600px) {
+.modal-content{
+background:#fff;
+padding:20px;
+border-radius:10px;
+width:300px;
+color:#000;
+}
 
-    body {
-        padding: 10px;
-    }
+.modal input{
+width:100%;
+padding:10px;
+margin:8px 0;
+}
 
-    .header h1 {
-        font-size: 22px;
-        padding: 0 50px;
-    }
+.modal button{
+width:100%;
+padding:10px;
+background:#2563eb;
+color:#fff;
+border:none;
+border-radius:8px;
+}
 
-    .header p {
-        font-size: 13px;
-    }
-
-    .admin-btn {
-        top: 5px;
-        right: 10px;
-        font-size: 11px;
-        padding: 5px 8px;
-    }
-
-    .summary {
-        flex-direction: column;
-    }
-
-    .card {
-        margin-bottom: 10px;
-    }
-
-    .container {
-        padding: 15px;
-    }
-
-    .item {
-        font-size: 14px;
-    }
-
-    .footer {
-        font-size: 12px;
-    }
+.modal.show{
+display:flex;
 }
 </style>
 </head>
 
 <body>
 
+<!-- HEADER -->
 <div class="header">
-    <h1>🎓 10th M1 Get-Together</h1>
-    <p>Event Fund Dashboard (Public View)</p>
-
-    <a href="/login.html" class="admin-btn">Admin Login</a>
+<h3>🎓 10th M1</h3>
+<button class="login-btn" onclick="openLogin()">Admin Login</button>
 </div>
 
-<div class="container">
+<!-- HERO -->
+<div class="hero">
+<h1>10th M1 Get-Together</h1>
+<p>Event Fund Dashboard</p>
+</div>
 
-    <!-- SUMMARY -->
-    <div class="summary">
-        <div class="card">
-            <p>Total Collected</p>
-            <h2 id="totalC">₹0</h2>
-        </div>
+<!-- MAIN CARD -->
+<div class="card">
 
-        <div class="card">
-            <p>Total Spent</p>
-            <h2 id="totalE" class="red">₹0</h2>
-        </div>
+<h3 style="text-align:center">Balance</h3>
+<h1 id="balance" style="text-align:center">₹0</h1>
 
-        <div class="card">
-            <p>Balance</p>
-            <h2 id="balance">₹0</h2>
-        </div>
-    </div>
+<div class="summary">
+<div class="box">
+<p>Collected</p>
+<h3 id="totalC">₹0</h3>
+</div>
+<div class="box">
+<p>Spent</p>
+<h3 id="totalE" class="red">₹0</h3>
+</div>
+</div>
 
-    <!-- CONTRIBUTIONS -->
-    <div class="section">
-        <h3>💰 Contributions</h3>
-        <div id="contribList"></div>
-    </div>
+<!-- CHART -->
+<canvas id="chart"></canvas>
 
-    <!-- EXPENSES -->
-    <div class="section">
-        <h3>💸 Expenses</h3>
-        <div id="expenseList"></div>
-    </div>
+<!-- CONTRIBUTIONS -->
+<h3>💰 Contributions</h3>
+<div id="contribList"></div>
+
+<!-- EXPENSES -->
+<h3>💸 Expenses</h3>
+<div id="expenseList"></div>
 
 </div>
 
-<!-- FOOTER -->
-<div class="footer">
-    Created by Rohit Gurkhe
+<!-- LOGIN MODAL -->
+<div class="modal" id="loginModal">
+<div class="modal-content">
+<h3>Admin Login</h3>
+<input id="user" placeholder="Username">
+<input id="pass" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+<p id="err" style="color:red;"></p>
+</div>
 </div>
 
 <script>
-const API_URL = window.location.origin;
+
+const API_URL = "https://school-tracker-vnba.onrender.com";
+let chart;
 
 // LOAD DATA
-async function loadData() {
-    const [c, e] = await Promise.all([
-        fetch(`${API_URL}/api/contributions`).then(r => r.json()),
-        fetch(`${API_URL}/api/expenses`).then(r => r.json())
-    ]);
+async function loadData(){
+const [c,e] = await Promise.all([
+fetch(`${API_URL}/api/contributions`).then(r=>r.json()),
+fetch(`${API_URL}/api/expenses`).then(r=>r.json())
+]);
 
-    updateUI(c, e);
+updateUI(c,e);
 }
 
 // UPDATE UI
-function updateUI(contributions, expenses) {
+function updateUI(c,e){
 
-    let totalC = 0;
-    let totalE = 0;
+let totalC = c.reduce((s,x)=>s+x.amount,0);
+let totalE = e.reduce((s,x)=>s+x.amount,0);
 
-    contributions.forEach(x => totalC += x.amount);
-    expenses.forEach(x => totalE += x.amount);
+document.getElementById("totalC").innerText="₹"+totalC;
+document.getElementById("totalE").innerText="₹"+totalE;
+document.getElementById("balance").innerText="₹"+(totalC-totalE);
 
-    document.getElementById("totalC").innerText = "₹" + totalC;
-    document.getElementById("totalE").innerText = "₹" + totalE;
-    document.getElementById("balance").innerText = "₹" + (totalC - totalE);
+document.getElementById("contribList").innerHTML =
+c.map(x=>`<div class="item"><span>${x.name}</span><span class="green">+₹${x.amount}</span></div>`).join("");
 
-    document.getElementById("contribList").innerHTML =
-        contributions.map(x => `
-            <div class="item">
-                <span>${x.name}</span>
-                <span class="green">+₹${x.amount}</span>
-            </div>
-        `).join("");
+document.getElementById("expenseList").innerHTML =
+e.map(x=>`<div class="item"><span>${x.name}</span><span class="red">-₹${x.amount}</span></div>`).join("");
 
-    document.getElementById("expenseList").innerHTML =
-        expenses.map(x => `
-            <div class="item">
-                <span>${x.name}</span>
-                <span class="red">-₹${x.amount}</span>
-            </div>
-        `).join("");
+drawChart(totalC,totalE);
+}
+
+// CHART
+function drawChart(c,e){
+
+const ctx = document.getElementById("chart");
+
+if(chart) chart.destroy();
+
+chart = new Chart(ctx,{
+type:'doughnut',
+data:{
+labels:["Collected","Spent"],
+datasets:[{
+data:[c,e],
+backgroundColor:["green","red"]
+}]
+}
+});
+}
+
+// LOGIN
+function openLogin(){
+document.getElementById("loginModal").classList.add("show");
+}
+
+async function login(){
+
+const user = document.getElementById("user").value;
+const pass = document.getElementById("pass").value;
+
+const res = await fetch(`${API_URL}/api/login`,{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({username:user,password:pass})
+});
+
+if(res.ok){
+localStorage.setItem("isAdmin","true");
+window.location.href="/index-mongodb.html";
+}else{
+document.getElementById("err").innerText="Invalid login";
+}
 }
 
 // AUTO REFRESH
-setInterval(loadData, 5000);
 loadData();
+setInterval(loadData,5000);
+
 </script>
 
 </body>
