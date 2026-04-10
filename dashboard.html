@@ -26,18 +26,36 @@ padding:20px;
 text-align:center;
 color:white;
 margin-bottom:20px;
-position:relative;
+}
+
+.header h1{
+font-size:28px;
+}
+
+.header p{
+font-size:14px;
+}
+
+/* ADMIN ICON BUTTON */
+.admin-wrapper{
+margin-top:10px;
 }
 
 .admin-btn{
-position:absolute;
-right:10px;
-top:10px;
-background:#8B4513;
+display:inline-flex;
+align-items:center;
+gap:6px;
+background: linear-gradient(45deg,#ff7a00,#ffb347);
 color:#fff;
-padding:6px 12px;
-border-radius:6px;
+padding:8px 14px;
+border-radius:20px;
 text-decoration:none;
+font-size:14px;
+box-shadow:0 4px 10px rgba(0,0,0,0.2);
+}
+
+.admin-btn:hover{
+transform:scale(1.05);
 }
 
 /* CONTAINER */
@@ -134,7 +152,13 @@ flex-direction:column;
 <div class="header">
 <h1>🎓 10th M1 Get-Together</h1>
 <p>Event Fund Dashboard</p>
-<a href="/login.html" class="admin-btn">Admin Login</a>
+
+<!-- ADMIN ICON BUTTON -->
+<div class="admin-wrapper">
+<a href="/login.html" class="admin-btn">
+👤 Admin Login
+</a>
+</div>
 </div>
 
 <div class="container">
@@ -173,7 +197,7 @@ flex-direction:column;
 <div id="expenseList" class="drop-content"></div>
 </div>
 
-<!-- BUDGET SECTION -->
+<!-- BUDGET -->
 <div class="drop-card">
 <div class="drop-header" onclick="toggleDrop('budgetList')">
 📊 Budget ▼
