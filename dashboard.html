@@ -40,17 +40,13 @@ border-radius:6px;
 text-decoration:none;
 }
 
-.admin-btn:hover{
-background:#6d3410;
-}
-
 /* CONTAINER */
 .container{
 max-width:900px;
 margin:auto;
 }
 
-/* SUMMARY CARDS */
+/* SUMMARY */
 .summary{
 display:flex;
 gap:10px;
@@ -64,10 +60,6 @@ padding:20px;
 border-radius:12px;
 text-align:center;
 box-shadow:0 5px 15px rgba(0,0,0,0.2);
-}
-
-.card h2{
-margin-top:10px;
 }
 
 .green{color:green;}
@@ -97,9 +89,20 @@ overflow:hidden;
 transition:0.4s ease;
 }
 
+/* SCROLL ENABLED */
 .drop-content.active{
 max-height:400px;
+overflow-y:auto;
 padding:10px 15px;
+}
+
+/* SCROLL STYLE */
+.drop-content::-webkit-scrollbar{
+width:6px;
+}
+.drop-content::-webkit-scrollbar-thumb{
+background:#c96b1a;
+border-radius:10px;
 }
 
 .item{
@@ -130,9 +133,7 @@ flex-direction:column;
 
 <div class="header">
 <h1>🎓 10th M1 Get-Together</h1>
-<p>Event Fund Dashboard (Public View)</p>
-
-<!-- ADMIN LOGIN (UNCHANGED) -->
+<p>Event Fund Dashboard</p>
 <a href="/login.html" class="admin-btn">Admin Login</a>
 </div>
 
@@ -172,6 +173,46 @@ flex-direction:column;
 <div id="expenseList" class="drop-content"></div>
 </div>
 
+<!-- BUDGET SECTION -->
+<div class="drop-card">
+<div class="drop-header" onclick="toggleDrop('budgetList')">
+📊 Budget ▼
+</div>
+<div id="budgetList" class="drop-content active">
+
+<div class="item">
+<span>Catering food (A1 quality)</span>
+<span>₹38000</span>
+</div>
+
+<div class="item">
+<span>Decorator</span>
+<span>₹12000</span>
+</div>
+
+<div class="item">
+<span>Hall AC (light bill + cleaning)</span>
+<span>₹8500</span>
+</div>
+
+<div class="item">
+<span>Balloon decoration</span>
+<span>₹4000</span>
+</div>
+
+<div class="item">
+<span>Teachers gift</span>
+<span>₹5000</span>
+</div>
+
+<div class="item" style="font-weight:bold;">
+<span>Total</span>
+<span>₹67500</span>
+</div>
+
+</div>
+</div>
+
 </div>
 
 <div class="footer">
@@ -181,7 +222,7 @@ Created by Rohit Gurkhe
 <script>
 const API_URL = window.location.origin;
 
-// TOGGLE DROPDOWN
+// TOGGLE
 function toggleDrop(id){
 document.getElementById(id).classList.toggle("active");
 }
@@ -193,10 +234,9 @@ const [c,e] = await Promise.all([
 fetch(`${API_URL}/api/contributions`).then(r=>r.json()),
 fetch(`${API_URL}/api/expenses`).then(r=>r.json())
 ]);
-
 updateUI(c,e);
 }catch(err){
-console.error("Error loading data:",err);
+console.log(err);
 }
 }
 
@@ -206,15 +246,15 @@ function updateUI(contributions, expenses){
 let totalC=0;
 let totalE=0;
 
-contributions.forEach(x=> totalC += x.amount);
-expenses.forEach(x=> totalE += x.amount);
+contributions.forEach(x=> totalC+=x.amount);
+expenses.forEach(x=> totalE+=x.amount);
 
 document.getElementById("totalC").innerText="₹"+totalC;
 document.getElementById("totalE").innerText="₹"+totalE;
 document.getElementById("balance").innerText="₹"+(totalC-totalE);
 
 document.getElementById("contribList").innerHTML =
-contributions.map(x => `
+contributions.map(x=>`
 <div class="item">
 <span>${x.name}</span>
 <span class="green">+₹${x.amount}</span>
@@ -222,7 +262,7 @@ contributions.map(x => `
 `).join("");
 
 document.getElementById("expenseList").innerHTML =
-expenses.map(x => `
+expenses.map(x=>`
 <div class="item">
 <span>${x.name}</span>
 <span class="red">-₹${x.amount}</span>
